@@ -102,8 +102,8 @@ export function RewardUnlockModal({
             <span
               style={{
                 fontFamily: tokens.font.mono,
-                fontSize: 11,
-                letterSpacing: 1.5,
+                fontSize: tokens.fontSize.xs,
+                letterSpacing: tokens.letterSpacing.wide,
                 textTransform: 'uppercase',
                 color: c.glow,
               }}
@@ -114,9 +114,9 @@ export function RewardUnlockModal({
           <p
             style={{
               fontFamily: tokens.font.body,
-              fontSize: 13.5,
+              fontSize: tokens.fontSize.base,
               color: '#F5F0FFcc',
-              lineHeight: 1.5,
+              lineHeight: tokens.lineHeight.base,
               marginBottom: 22,
             }}
           >

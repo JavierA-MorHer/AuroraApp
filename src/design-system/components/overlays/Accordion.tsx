@@ -45,8 +45,8 @@ export function Accordion({ items }: AccordionProps) {
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 fontFamily: tokens.font.body,
-                fontSize: 14,
-                fontWeight: 600,
+                fontSize: tokens.fontSize.base,
+                fontWeight: tokens.fontWeight.semibold,
                 color: c.text,
                 minHeight: tokens.touchTarget.min,
               }}
@@ -65,9 +65,9 @@ export function Accordion({ items }: AccordionProps) {
               <div
                 style={{
                   padding: '0 16px 16px',
-                  fontSize: 13,
+                  fontSize: tokens.fontSize.md,
                   color: c.textMuted,
-                  lineHeight: 1.6,
+                  lineHeight: tokens.lineHeight.relaxed,
                   animation: `fadeIn ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}`,
                 }}
               >

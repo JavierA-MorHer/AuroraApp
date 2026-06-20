@@ -74,7 +74,7 @@ export function RewardVault({ items }: RewardVaultProps) {
           marginBottom: 18,
         }}
       >
-        <span style={{ fontFamily: tokens.font.mono, fontSize: 12, color: c.textMuted }}>
+        <span style={{ fontFamily: tokens.font.mono, fontSize: tokens.fontSize.sm, color: c.textMuted }}>
           {earned.length} de {items.length} cartas ganadas
         </span>
         <ProgressBarMini value={earned.length} max={items.length} />
@@ -115,7 +115,7 @@ export function RewardVault({ items }: RewardVaultProps) {
             <span
               style={{
                 fontFamily: tokens.font.mono,
-                fontSize: 9.5,
+                fontSize: tokens.fontSize['2xs'],
                 color: c.textFaint,
                 textAlign: 'center',
                 lineHeight: 1.3,

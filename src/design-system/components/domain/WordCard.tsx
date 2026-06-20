@@ -60,8 +60,8 @@ export function WordCard({ word, translation, example }: WordCardProps) {
             <span
               style={{
                 fontFamily: tokens.font.display,
-                fontSize: 26,
-                fontWeight: 600,
+                fontSize: tokens.fontSize['4xl'],
+                fontWeight: tokens.fontWeight.semibold,
                 color: c.text,
               }}
             >
@@ -72,7 +72,7 @@ export function WordCard({ word, translation, example }: WordCardProps) {
           <span
             style={{
               fontFamily: tokens.font.mono,
-              fontSize: 11,
+              fontSize: tokens.fontSize.xs,
               color: c.textFaint,
               marginTop: 6,
             }}
@@ -85,8 +85,8 @@ export function WordCard({ word, translation, example }: WordCardProps) {
           <span
             style={{
               fontFamily: tokens.font.display,
-              fontSize: 24,
-              fontWeight: 600,
+              fontSize: tokens.fontSize['4xl'],
+              fontWeight: tokens.fontWeight.semibold,
               color: '#fff',
             }}
           >
@@ -95,7 +95,7 @@ export function WordCard({ word, translation, example }: WordCardProps) {
           <span
             style={{
               fontFamily: tokens.font.body,
-              fontSize: 13,
+              fontSize: tokens.fontSize.md,
               color: '#ffffffcc',
               marginTop: 8,
               fontStyle: 'italic',

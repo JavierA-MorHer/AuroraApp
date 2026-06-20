@@ -93,8 +93,8 @@ export function RewardCard({
         <span
           style={{
             fontFamily: tokens.font.mono,
-            fontSize: 9.5,
-            letterSpacing: 2,
+            fontSize: tokens.fontSize['2xs'],
+            letterSpacing: tokens.letterSpacing.wider,
             color: '#ffffffaa',
             marginBottom: 4,
             textAlign: 'center',
@@ -105,12 +105,12 @@ export function RewardCard({
         <h3
           style={{
             fontFamily: tokens.font.display,
-            fontSize: 17,
-            fontWeight: 600,
+            fontSize: tokens.fontSize.xl,
+            fontWeight: tokens.fontWeight.semibold,
             color: c.text,
             textAlign: 'center',
             margin: '0 0 4px',
-            lineHeight: 1.2,
+            lineHeight: tokens.lineHeight.tight,
           }}
         >
           {title}
@@ -118,17 +118,17 @@ export function RewardCard({
         <p
           style={{
             fontFamily: tokens.font.body,
-            fontSize: 11,
+            fontSize: tokens.fontSize.xs,
             color: c.textMuted,
             textAlign: 'center',
             margin: '0 0 10px',
-            lineHeight: 1.4,
+            lineHeight: tokens.lineHeight.snug,
           }}
         >
           {subtitle}
         </p>
         <div style={{ width: '100%', borderTop: `1px dashed ${c.border}`, marginBottom: 8 }} />
-        <span style={{ fontFamily: tokens.font.mono, fontSize: 11.5, letterSpacing: 1.5, color: c.text }}>
+        <span style={{ fontFamily: tokens.font.mono, fontSize: tokens.fontSize.xs, letterSpacing: tokens.letterSpacing.wide, color: c.text }}>
           {code}
         </span>
       </div>

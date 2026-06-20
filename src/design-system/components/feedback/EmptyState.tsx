@@ -40,8 +40,8 @@ export function EmptyState({
       <h3
         style={{
           fontFamily: tokens.font.display,
-          fontSize: 18,
-          fontWeight: 600,
+          fontSize: tokens.fontSize['2xl'],
+          fontWeight: tokens.fontWeight.semibold,
           color: c.text,
           marginBottom: 6,
         }}
@@ -51,11 +51,11 @@ export function EmptyState({
       <p
         style={{
           fontFamily: tokens.font.body,
-          fontSize: 13.5,
+          fontSize: tokens.fontSize.lg,
           color: c.textMuted,
           maxWidth: 320,
           margin: '0 auto 20px',
-          lineHeight: 1.6,
+          lineHeight: tokens.lineHeight.relaxed,
         }}
       >
         {description}

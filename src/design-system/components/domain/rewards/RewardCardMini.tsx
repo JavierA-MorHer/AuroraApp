@@ -45,8 +45,8 @@ export function RewardCardMini({ category, title, onClick }: RewardCardMiniProps
       <span
         style={{
           fontFamily: tokens.font.body,
-          fontSize: 10.5,
-          fontWeight: 600,
+          fontSize: tokens.fontSize['2xs'],
+          fontWeight: tokens.fontWeight.semibold,
           color: '#fff',
           textAlign: 'center',
           lineHeight: 1.3,
