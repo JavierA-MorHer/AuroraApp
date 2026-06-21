@@ -6,6 +6,7 @@ import Login from '@/routes/Login'
 import Home from '@/routes/Home'
 import Lessons from '@/routes/Lessons'
 import Rewards from '@/routes/Rewards'
+import Profile from '@/routes/Profile'
 import App from './App'
 
 const router = createBrowserRouter([
@@ -13,6 +14,7 @@ const router = createBrowserRouter([
   { path: '/home',     element: <Home /> },
   { path: '/lessons',  element: <Lessons /> },
   { path: '/rewards',  element: <Rewards /> },
+  { path: '/profile',  element: <Profile /> },
   { path: '/showcase', element: <App /> },
 ])
 
