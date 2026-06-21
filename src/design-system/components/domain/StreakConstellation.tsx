@@ -38,9 +38,9 @@ export function StreakConstellation({ lit = 4, total = 7 }: StreakConstellationP
           <div
             style={{
               fontFamily: tokens.font.mono,
-              fontSize: tokens.fontSize.sm,
+              fontSize: 11,
               color: c.textMuted,
-              letterSpacing: tokens.letterSpacing.normal,
+              letterSpacing: 1.5,
               textTransform: 'uppercase',
             }}
           >
@@ -49,8 +49,8 @@ export function StreakConstellation({ lit = 4, total = 7 }: StreakConstellationP
           <div
             style={{
               fontFamily: tokens.font.display,
-              fontSize: tokens.fontSize['5xl'],
-              fontWeight: tokens.fontWeight.semibold,
+              fontSize: 36,
+              fontWeight: 600,
               color: c.text,
               display: 'flex',
               alignItems: 'center',
@@ -109,7 +109,7 @@ export function StreakConstellation({ lit = 4, total = 7 }: StreakConstellationP
               <span
                 style={{
                   fontFamily: tokens.font.mono,
-                  fontSize: tokens.fontSize['2xs'],
+                  fontSize: 10,
                   color: isLit ? c.text : c.textFaint,
                 }}
               >
