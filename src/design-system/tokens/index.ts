@@ -1,11 +1,11 @@
 export { themes } from './colors'
 export type { ThemeColors, ThemeMode } from './colors'
-export { font, iconSize, FONT_IMPORT } from './typography'
+export { font, iconSize, fontSize, fontWeight, letterSpacing, lineHeight, FONT_IMPORT } from './typography'
 export { radius, space, container, breakpoint, zIndex } from './spacing'
 export { duration, easing, state } from './motion'
 export { touchTarget, focusRingStyle } from './a11y'
 
-import { font, iconSize } from './typography'
+import { font, iconSize, fontSize, fontWeight, letterSpacing, lineHeight } from './typography'
 import { radius, space, container, breakpoint, zIndex } from './spacing'
 import { duration, easing, state } from './motion'
 import { touchTarget } from './a11y'
@@ -13,6 +13,10 @@ import { touchTarget } from './a11y'
 export const tokens = {
   font,
   iconSize,
+  fontSize,
+  fontWeight,
+  letterSpacing,
+  lineHeight,
   radius,
   space,
   container,
