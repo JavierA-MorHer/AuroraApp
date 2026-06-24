@@ -223,7 +223,7 @@ export function LoginForm() {
                 render={({ field }) => (
                   <Input
                     label="Tu nombre"
-                    placeholder="María José"
+                    placeholder="Nayeli Valadez"
                     value={field.value}
                     onChange={field.onChange}
                     status={signupErrors.name ? 'error' : undefined}
