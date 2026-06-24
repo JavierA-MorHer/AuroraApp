@@ -43,7 +43,7 @@ export function useProfile() {
         .eq('id', user!.id)
         .single()
       if (error) throw error
-      return data
+      return data as { first_name: string; last_name: string | null }
     },
     enabled: !!user,
   })
@@ -70,14 +70,10 @@ export function useProfile() {
     const firstName = data.name.split(' ')[0]
     const lastName = data.name.split(' ').slice(1).join(' ') || null
 
-    const updates: Array<Promise<unknown>> = [
-      supabase.from('profiles').update({ first_name: firstName, last_name: lastName }).eq('id', user.id),
-    ]
+    await supabase.from('profiles').update({ first_name: firstName, last_name: lastName }).eq('id', user.id)
     if (data.email !== user.email) {
-      updates.push(supabase.auth.updateUser({ email: data.email }))
+      await supabase.auth.updateUser({ email: data.email })
     }
-
-    await Promise.all(updates)
     queryClient.invalidateQueries({ queryKey: ['profile', user.id] })
     setProfileSaved(true)
     setTimeout(() => setProfileSaved(false), 2500)

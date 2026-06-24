@@ -5,6 +5,19 @@ import { useAuthStore } from '@/stores/useAuthStore'
 import type { RewardItem } from '../types'
 import type { RewardCategory } from '@/design-system'
 
+type RewardRow = {
+  id: string
+  title: string
+  description: string | null
+  unlock_hint: string | null
+  category: string
+  code: string | null
+  is_active: boolean
+  display_order: number
+}
+
+type UserRewardRow = { reward_id: string; is_redeemed: boolean; unlocked_at: string }
+
 export interface PendingUnlock {
   rewardId: string
   category: RewardCategory
@@ -28,11 +41,12 @@ export function useRewards() {
 
       if (rewardsResult.error) throw rewardsResult.error
 
-      const earnedMap = new Map(
-        (userRewardsResult.data ?? []).map((r) => [r.reward_id, r]),
-      )
+      const rewardRows = (rewardsResult.data ?? []) as RewardRow[]
+      const userRewardRows = (userRewardsResult.data ?? []) as UserRewardRow[]
 
-      return (rewardsResult.data ?? []).map((reward): RewardItem => {
+      const earnedMap = new Map(userRewardRows.map((r) => [r.reward_id, r]))
+
+      return rewardRows.map((reward): RewardItem => {
         const earned = earnedMap.get(reward.id)
         return {
           id: reward.id,
@@ -47,14 +61,24 @@ export function useRewards() {
     },
   })
 
+  function triggerUnlock() {
+    const next = (items as RewardItem[]).find((i) => !i.earned)
+    if (!next) return
+    setPendingUnlock({
+      rewardId: next.id,
+      category: 'surprise',
+      title: 'Recompensa desbloqueada',
+      subtitle: 'Demo de desbloqueo',
+      code: 'AURORA-DEMO',
+    })
+  }
+
   async function saveToVault() {
     if (!pendingUnlock || !user) return
-
     await supabase.from('user_rewards').insert({
       user_id: user.id,
       reward_id: pendingUnlock.rewardId,
     })
-
     queryClient.invalidateQueries({ queryKey: ['rewards', user.id] })
     setPendingUnlock(null)
   }
@@ -72,6 +96,7 @@ export function useRewards() {
     pendingUnlock,
     earnedCount,
     totalCount,
+    triggerUnlock,
     setPendingUnlock,
     saveToVault,
     closeUnlock,

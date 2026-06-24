@@ -3,6 +3,25 @@ import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/useAuthStore'
 import type { Lesson, LessonCategory, LessonLevel, LessonStatus } from '../types'
 
+type LessonRow = {
+  id: string
+  title: string
+  description: string | null
+  level: string
+  category: string
+  estimated_minutes: number | null
+  module_id: string
+  order: number
+  xp_reward: number
+  is_published: boolean
+  created_at: string
+  updated_at: string
+}
+
+type ExerciseRow = { id: string; lesson_id: string }
+
+type ProgressRow = { lesson_id: string; status: string; score: number | null }
+
 const STATUS_ORDER: Record<LessonStatus, number> = {
   in_progress: 0,
   available: 1,
@@ -24,16 +43,18 @@ export function useLessons() {
 
       if (lessonsResult.error) throw lessonsResult.error
 
+      const lessonRows = (lessonsResult.data ?? []) as LessonRow[]
+      const exerciseRows = (exercisesResult.data ?? []) as ExerciseRow[]
+      const progressRows = (progressResult.data ?? []) as ProgressRow[]
+
       const exerciseCountMap = new Map<string, number>()
-      for (const ex of exercisesResult.data ?? []) {
+      for (const ex of exerciseRows) {
         exerciseCountMap.set(ex.lesson_id, (exerciseCountMap.get(ex.lesson_id) ?? 0) + 1)
       }
 
-      const progressMap = new Map(
-        (progressResult.data ?? []).map((p) => [p.lesson_id, p]),
-      )
+      const progressMap = new Map(progressRows.map((p) => [p.lesson_id, p]))
 
-      return (lessonsResult.data ?? [])
+      return lessonRows
         .map((lesson, index): Lesson => {
           const progress = progressMap.get(lesson.id)
           const exerciseCount = exerciseCountMap.get(lesson.id) ?? 0
