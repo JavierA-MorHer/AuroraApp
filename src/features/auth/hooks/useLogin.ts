@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { supabase } from '@/lib/supabase'
 import type { LoginCredentials } from '../types'
 
 const schema = z.object({
@@ -24,9 +25,11 @@ export function useLogin() {
     setIsLoading(true)
     setServerError(null)
     try {
-      // TODO: replace with supabase.auth.signInWithPassword(data)
-      await new Promise((r) => setTimeout(r, 1000))
-      console.log('Login OK:', data.email)
+      const { error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      })
+      if (error) throw error
       navigate('/home')
     } catch {
       setServerError('Correo o contraseña incorrectos. Vuelve a intentarlo.')

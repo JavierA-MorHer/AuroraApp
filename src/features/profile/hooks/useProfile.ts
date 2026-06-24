@@ -1,9 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
-import type { ProfileData, PasswordData } from '../types'
+import { supabase } from '@/lib/supabase'
+import { useAuthStore } from '@/stores/useAuthStore'
+import type { PasswordData } from '../types'
 
 const profileSchema = z.object({
   name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
@@ -21,16 +24,33 @@ const passwordSchema = z
     path: ['confirmPassword'],
   })
 
+type ProfileFormData = z.infer<typeof profileSchema>
+
 export function useProfile() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const user = useAuthStore((s) => s.user)
   const [signOutDialogOpen, setSignOutDialogOpen] = useState(false)
   const [profileSaved, setProfileSaved] = useState(false)
   const [passwordSaved, setPasswordSaved] = useState(false)
 
-  const profileForm = useForm<ProfileData>({
+  const { data: profile } = useQuery({
+    queryKey: ['profile', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('id', user!.id)
+        .single()
+      if (error) throw error
+      return data
+    },
+    enabled: !!user,
+  })
+
+  const profileForm = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
-    // TODO: populate from supabase.auth.getUser()
-    defaultValues: { name: 'María José', email: 'maria@example.com' },
+    defaultValues: { name: '', email: '' },
   })
 
   const passwordForm = useForm<PasswordData>({
@@ -38,25 +58,41 @@ export function useProfile() {
     defaultValues: { currentPassword: '', newPassword: '', confirmPassword: '' },
   })
 
-  async function saveProfile(data: ProfileData) {
-    // TODO: supabase.auth.updateUser({ data: { name: data.name }, email: data.email })
-    await new Promise((r) => setTimeout(r, 600))
-    console.log('Profile updated:', data)
+  useEffect(() => {
+    if (profile && user) {
+      const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ')
+      profileForm.reset({ name: fullName, email: user.email ?? '' })
+    }
+  }, [profile, user, profileForm])
+
+  async function saveProfile(data: ProfileFormData) {
+    if (!user) return
+    const firstName = data.name.split(' ')[0]
+    const lastName = data.name.split(' ').slice(1).join(' ') || null
+
+    const updates: Array<Promise<unknown>> = [
+      supabase.from('profiles').update({ first_name: firstName, last_name: lastName }).eq('id', user.id),
+    ]
+    if (data.email !== user.email) {
+      updates.push(supabase.auth.updateUser({ email: data.email }))
+    }
+
+    await Promise.all(updates)
+    queryClient.invalidateQueries({ queryKey: ['profile', user.id] })
     setProfileSaved(true)
     setTimeout(() => setProfileSaved(false), 2500)
   }
 
-  async function savePassword(_data: PasswordData) {
-    // TODO: supabase.auth.updateUser({ password: _data.newPassword })
-    await new Promise((r) => setTimeout(r, 600))
-    console.log('Password updated')
+  async function savePassword(data: PasswordData) {
+    const { error } = await supabase.auth.updateUser({ password: data.newPassword })
+    if (error) throw error
     passwordForm.reset()
     setPasswordSaved(true)
     setTimeout(() => setPasswordSaved(false), 2500)
   }
 
-  function signOut() {
-    // TODO: supabase.auth.signOut()
+  async function signOut() {
+    await supabase.auth.signOut()
     navigate('/')
   }
 

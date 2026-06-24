@@ -1,50 +1,70 @@
 import { useState } from 'react'
-import { MOCK_REWARDS } from '../data/mockRewards'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
+import { useAuthStore } from '@/stores/useAuthStore'
 import type { RewardItem } from '../types'
 import type { RewardCategory } from '@/design-system'
 
 export interface PendingUnlock {
-  itemId: string
+  rewardId: string
   category: RewardCategory
   title: string
   subtitle: string
   code: string
 }
 
-// Reward unlocked when the user completes "Verbos en pasado"
-// TODO: trigger this from the lesson completion flow
-const NEXT_UNLOCK: PendingUnlock = {
-  itemId: '3',
-  category: 'massage',
-  title: 'Masaje relajante',
-  subtitle: 'Por completar "Verbos en pasado"',
-  code: 'AURORA-MAS',
-}
-
 export function useRewards() {
-  const [items, setItems] = useState<RewardItem[]>(MOCK_REWARDS)
+  const user = useAuthStore((s) => s.user)
+  const queryClient = useQueryClient()
   const [pendingUnlock, setPendingUnlock] = useState<PendingUnlock | null>(null)
 
-  function triggerUnlock() {
-    setPendingUnlock(NEXT_UNLOCK)
-  }
+  const { data: items = [], isLoading } = useQuery({
+    queryKey: ['rewards', user?.id],
+    queryFn: async () => {
+      const [rewardsResult, userRewardsResult] = await Promise.all([
+        supabase
+          .from('rewards')
+          .select('*')
+          .eq('is_active', true)
+          .order('display_order'),
+        user
+          ? supabase
+              .from('user_rewards')
+              .select('reward_id, is_redeemed, unlocked_at')
+              .eq('user_id', user.id)
+          : Promise.resolve({ data: [] as Array<{ reward_id: string; is_redeemed: boolean; unlocked_at: string }>, error: null }),
+      ])
 
-  function saveToVault() {
-    if (!pendingUnlock) return
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === pendingUnlock.itemId
-          ? {
-              ...item,
-              earned: true,
-              category: pendingUnlock.category,
-              title: pendingUnlock.title,
-              subtitle: pendingUnlock.subtitle,
-              code: pendingUnlock.code,
-            }
-          : item,
-      ),
-    )
+      if (rewardsResult.error) throw rewardsResult.error
+
+      const earnedMap = new Map(
+        (userRewardsResult.data ?? []).map((r) => [r.reward_id, r]),
+      )
+
+      return (rewardsResult.data ?? []).map((reward): RewardItem => {
+        const earned = earnedMap.get(reward.id)
+        return {
+          id: reward.id,
+          earned: !!earned,
+          category: earned ? (reward.category as RewardCategory) : undefined,
+          title: earned ? reward.title : undefined,
+          subtitle: earned ? (reward.description ?? undefined) : undefined,
+          code: earned ? (reward.code ?? undefined) : undefined,
+          unlockHint: !earned ? (reward.unlock_hint ?? undefined) : undefined,
+        }
+      })
+    },
+  })
+
+  async function saveToVault() {
+    if (!pendingUnlock || !user) return
+
+    await supabase.from('user_rewards').insert({
+      user_id: user.id,
+      reward_id: pendingUnlock.rewardId,
+    })
+
+    queryClient.invalidateQueries({ queryKey: ['rewards', user.id] })
     setPendingUnlock(null)
   }
 
@@ -57,10 +77,11 @@ export function useRewards() {
 
   return {
     items,
+    isLoading,
     pendingUnlock,
     earnedCount,
     totalCount,
-    triggerUnlock,
+    setPendingUnlock,
     saveToVault,
     closeUnlock,
   }
