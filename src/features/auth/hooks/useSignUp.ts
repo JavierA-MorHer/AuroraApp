@@ -23,7 +23,6 @@ export function useSignUp() {
   const navigate = useNavigate()
   const [serverError, setServerError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [awaitingConfirmation, setAwaitingConfirmation] = useState(false)
 
   const form = useForm<SignUpCredentials>({
     resolver: zodResolver(schema),
@@ -48,11 +47,7 @@ export function useSignUp() {
       if (error) throw error
 
       if (result.session) {
-        // Email confirmation desactivada: sesión inmediata
         navigate('/home')
-      } else {
-        // Supabase envió un email de confirmación
-        setAwaitingConfirmation(true)
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : null
@@ -67,6 +62,5 @@ export function useSignUp() {
     onSubmit: form.handleSubmit(handleSubmit),
     isLoading,
     serverError,
-    awaitingConfirmation,
   }
 }

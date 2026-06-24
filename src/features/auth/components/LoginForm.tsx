@@ -213,20 +213,8 @@ export function LoginForm() {
           </form>
         )}
 
-        {/* Confirmación de email pendiente */}
-        {!isLogin && signup.awaitingConfirmation && (
-          <div style={{ textAlign: 'center', padding: '16px 0' }}>
-            <p style={{ fontFamily: tokens.font.display, fontSize: 16, fontWeight: 600, color: c.text, marginBottom: 8 }}>
-              Revisa tu correo
-            </p>
-            <p style={{ fontFamily: tokens.font.body, fontSize: 14, color: c.textMuted, margin: 0 }}>
-              Te enviamos un enlace de confirmación. Ábrelo para activar tu cuenta y luego inicia sesión.
-            </p>
-          </div>
-        )}
-
         {/* Sign-up form */}
-        {!isLogin && !signup.awaitingConfirmation && (
+        {!isLogin && (
           <form onSubmit={signup.onSubmit} noValidate>
             <Stack gap={5}>
               <Controller
