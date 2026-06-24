@@ -380,6 +380,7 @@ export interface Database {
         }
       }
     }
+    Views: Record<string, never>
     Functions: {
       record_daily_activity: {
         Args: {
@@ -390,5 +391,7 @@ export interface Database {
         Returns: void
       }
     }
+    Enums: Record<string, never>
+    CompositeTypes: Record<string, never>
   }
 }

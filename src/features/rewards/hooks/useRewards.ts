@@ -22,17 +22,8 @@ export function useRewards() {
     queryKey: ['rewards', user?.id],
     queryFn: async () => {
       const [rewardsResult, userRewardsResult] = await Promise.all([
-        supabase
-          .from('rewards')
-          .select('*')
-          .eq('is_active', true)
-          .order('display_order'),
-        user
-          ? supabase
-              .from('user_rewards')
-              .select('reward_id, is_redeemed, unlocked_at')
-              .eq('user_id', user.id)
-          : Promise.resolve({ data: [] as Array<{ reward_id: string; is_redeemed: boolean; unlocked_at: string }>, error: null }),
+        supabase.from('rewards').select('*').eq('is_active', true).order('display_order'),
+        supabase.from('user_rewards').select('reward_id, is_redeemed, unlocked_at'),
       ])
 
       if (rewardsResult.error) throw rewardsResult.error

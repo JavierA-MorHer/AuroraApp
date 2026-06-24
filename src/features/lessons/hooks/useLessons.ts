@@ -17,21 +17,9 @@ export function useLessons() {
     queryKey: ['lessons', user?.id],
     queryFn: async () => {
       const [lessonsResult, exercisesResult, progressResult] = await Promise.all([
-        supabase
-          .from('lessons')
-          .select('*')
-          .eq('is_published', true)
-          .order('order'),
-        supabase
-          .from('exercises')
-          .select('id, lesson_id')
-          .eq('is_published', true),
-        user
-          ? supabase
-              .from('user_lesson_progress')
-              .select('lesson_id, status, score')
-              .eq('user_id', user.id)
-          : Promise.resolve({ data: [] as Array<{ lesson_id: string; status: string; score: number | null }>, error: null }),
+        supabase.from('lessons').select('*').eq('is_published', true).order('order'),
+        supabase.from('exercises').select('id, lesson_id').eq('is_published', true),
+        supabase.from('user_lesson_progress').select('lesson_id, status, score'),
       ])
 
       if (lessonsResult.error) throw lessonsResult.error
