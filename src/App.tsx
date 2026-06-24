@@ -180,7 +180,7 @@ export default function App() {
                   <div
                     style={{ fontFamily: tokens.font.display, fontSize: 16, fontWeight: 600, color: c.text }}
                   >
-                    María José
+                    Nayeli Valadez
                   </div>
                   <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
                     <Badge>Nivel A2</Badge>

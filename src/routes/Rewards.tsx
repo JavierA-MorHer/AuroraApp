@@ -31,7 +31,7 @@ export default function Rewards() {
 
   return (
     <Page padding="0">
-      <TopBar initials="MJ" name="María José" streak={4} />
+      <TopBar initials="NV" name="Nayeli Valadez" streak={4} />
 
       <Container size="sm">
         <div
