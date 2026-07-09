@@ -4,12 +4,13 @@ import { Avatar, tokens } from '@/design-system'
 
 interface TopBarProps {
   initials: string
+  avatarUrl?: string | null
   name: string
   gender: 'male' | 'female' | null
   streak: number
 }
 
-export function TopBar({ initials, name, gender, streak }: TopBarProps) {
+export function TopBar({ initials, avatarUrl, name, gender, streak }: TopBarProps) {
   const greeting = gender === 'male' ? 'Bienvenido,' : gender === 'female' ? 'Bienvenida,' : 'Bienvenid@,'
   const { c } = useThemeStore()
 
@@ -36,9 +37,8 @@ export function TopBar({ initials, name, gender, streak }: TopBarProps) {
           margin: '0 auto',
         }}
       >
-        {/* Avatar + nombre */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Avatar initials={initials} size={38} online />
+          <Avatar initials={initials} src={avatarUrl} size={38} online />
           <div>
             <p
               style={{

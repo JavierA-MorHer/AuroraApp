@@ -3,11 +3,12 @@ import { tokens } from '@/design-system/tokens'
 
 interface AvatarProps {
   initials: string
+  src?: string | null
   size?: number
   online?: boolean
 }
 
-export function Avatar({ initials, size = 40, online = false }: AvatarProps) {
+export function Avatar({ initials, src, size = 40, online = false }: AvatarProps) {
   const { c } = useThemeStore()
 
   return (
@@ -17,7 +18,7 @@ export function Avatar({ initials, size = 40, online = false }: AvatarProps) {
           width: size,
           height: size,
           borderRadius: '50%',
-          background: `linear-gradient(135deg, ${c.secondary}, ${c.primary})`,
+          background: src ? 'transparent' : `linear-gradient(135deg, ${c.secondary}, ${c.primary})`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -25,9 +26,18 @@ export function Avatar({ initials, size = 40, online = false }: AvatarProps) {
           fontWeight: 600,
           color: '#fff',
           fontSize: size * 0.38,
+          overflow: 'hidden',
         }}
       >
-        {initials}
+        {src ? (
+          <img
+            src={src}
+            alt="Avatar"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        ) : (
+          initials
+        )}
       </div>
       {online && (
         <div

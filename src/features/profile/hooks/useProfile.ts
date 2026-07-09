@@ -40,11 +40,16 @@ export function useProfile() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('first_name, last_name, gender')
+        .select('first_name, last_name, gender, avatar_url')
         .eq('id', user!.id)
         .single()
       if (error) throw error
-      return data as { first_name: string; last_name: string | null; gender: 'male' | 'female' | null }
+      return data as { 
+        first_name: string; 
+        last_name: string | null; 
+        gender: 'male' | 'female' | null;
+        avatar_url: string | null;
+      }
     },
     enabled: !!user,
   })
@@ -99,6 +104,45 @@ export function useProfile() {
     navigate('/')
   }
 
+  const [uploading, setUploading] = useState(false)
+
+  async function uploadAvatar(file: File) {
+    if (!user) return
+    setUploading(true)
+    try {
+      const fileExt = file.name.split('.').pop()
+      const filePath = `${user.id}/avatar-${Date.now()}.${fileExt}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true })
+
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath)
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user.id)
+
+      if (updateError) throw updateError
+
+      await supabase.auth.updateUser({
+        data: { avatar_url: publicUrl },
+      })
+
+      await queryClient.invalidateQueries({ queryKey: ['profile', user.id] })
+    } catch (err) {
+      console.error('Error uploading avatar:', err)
+      alert('Hubo un error al subir la foto de perfil.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
   return {
     profileForm,
     passwordForm,
@@ -109,5 +153,8 @@ export function useProfile() {
     onSaveProfile: profileForm.handleSubmit(saveProfile),
     onSavePassword: passwordForm.handleSubmit(savePassword),
     signOut,
+    profile,
+    uploadAvatar,
+    uploading,
   }
 }

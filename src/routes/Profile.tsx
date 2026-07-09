@@ -57,6 +57,9 @@ export default function Profile() {
     onSaveProfile,
     onSavePassword,
     signOut,
+    profile,
+    uploadAvatar,
+    uploading,
   } = useProfile()
 
   const pErr = profileForm.formState.errors
@@ -90,8 +93,13 @@ export default function Profile() {
               Perfil
             </h1>
 
-            {/* Avatar */}
-            <ProfileAvatar initials={initials} size={88} />
+            <ProfileAvatar
+              initials={initials}
+              avatarUrl={profile?.avatar_url}
+              onUpload={uploadAvatar}
+              uploading={uploading}
+              size={88}
+            />
 
             {/* Información personal */}
             <Stack gap={3}>

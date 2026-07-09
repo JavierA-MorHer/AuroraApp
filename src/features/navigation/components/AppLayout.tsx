@@ -14,10 +14,11 @@ export function AppLayout() {
   const gender: 'male' | 'female' | null = user?.user_metadata?.gender ?? null
   const displayName = [firstName, lastName].filter(Boolean).join(' ') || 'Tú'
   const initials = [firstName[0], lastName[0]].filter(Boolean).join('').toUpperCase() || '?'
+  const avatarUrl: string | null = user?.user_metadata?.avatar_url ?? null
 
   return (
     <Page padding="0">
-      <TopBar initials={initials} name={displayName} gender={gender} streak={streakDays} />
+      <TopBar initials={initials} avatarUrl={avatarUrl} name={displayName} gender={gender} streak={streakDays} />
       <Outlet />
       <BottomNav />
     </Page>
