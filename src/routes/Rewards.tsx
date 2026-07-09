@@ -23,7 +23,8 @@ export default function Rewards() {
     closeUnlock,
   } = useRewards()
 
-  const hasNextUnlock = items.some((i) => !i.earned)
+  const nextLocked = items.find((i) => !i.earned && !i.unclaimed)
+  const hasNextUnlock = !!nextLocked
 
   return (
     <>
@@ -89,7 +90,7 @@ export default function Rewards() {
                       Próxima recompensa
                     </p>
                     <p style={{ fontFamily: tokens.font.body, fontSize: 13, color: c.textMuted, margin: 0 }}>
-                      Completa "Verbos en pasado" para desbloquearla
+                      {nextLocked.unlockHint || 'Sigue practicando para desbloquearla'}
                     </p>
                   </div>
                 </div>
