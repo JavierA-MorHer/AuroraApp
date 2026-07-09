@@ -1,5 +1,6 @@
 ﻿import { useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { X, Star } from 'lucide-react'
 import { useThemeStore } from '@/stores/useThemeStore'
 import { useAuthStore } from '@/stores/useAuthStore'
@@ -65,6 +66,7 @@ export default function LessonPlayer() {
   const navigate = useNavigate()
   const { c } = useThemeStore()
   const { user } = useAuthStore()
+  const queryClient = useQueryClient()
   const { lesson, exercises, isLoading } = useLesson(lessonId ?? '')
 
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -148,6 +150,10 @@ export default function LessonPlayer() {
           p_minutes_studied: Math.round(allResults.length * 1.5),
         })
       }
+
+      // Invalidar caches para que Lessons y Home reflejen el nuevo estado
+      await queryClient.invalidateQueries({ queryKey: ['lessons', user.id] })
+      await queryClient.invalidateQueries({ queryKey: ['streak', user.id] })
     } finally {
       setSaving(false)
     }
