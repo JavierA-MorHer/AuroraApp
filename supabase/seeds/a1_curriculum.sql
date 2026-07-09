@@ -175,8 +175,8 @@ VALUES
    '{"question": "What is the number 15 in English?", "options": ["fifteen", "fifty", "fourteen", "sixteen"], "answer": "fifteen", "explanation": "''Fifteen'' = 15. Los números del 13 al 19 terminan en ''-teen''. Cuidado: ''fifty'' = 50 (suena parecido pero es muy diferente). ''Fourteen'' = 14 y ''sixteen'' = 16. La diferencia entre -teen (decenas) y -ty (múltiplos de 10) es crucial."}'::jsonb,
    10, 2, true),
 
-  (gen_random_uuid(), les12, 'fill_blank', 4,
-   '{"sentence": "Nice to ___ you!", "answer": "meet", "hint": "Frase de saludo al conocer a alguien", "explanation": "''Nice to meet you'' es la frase estándar al conocer a alguien por primera vez, equivalente a ''mucho gusto''. Siempre se usa con ''meet'' (conocer a alguien en persona). No se dice ''know'' en este contexto."}'::jsonb,
+  (gen_random_uuid(), les12, 'multiple_choice', 4,
+   '{"question": "Nice to ___ you! (al conocer a alguien)", "options": ["meet", "see", "know", "find"], "answer": "meet", "explanation": "''Nice to meet you'' es el equivalente a ''mucho gusto'' en inglés. ''Meet'' significa conocer a alguien por primera vez en persona. Las otras opciones no funcionan en esta frase: ''see'' es ver, ''know'' es saber/conocer algo ya familiar, ''find'' es encontrar un objeto."}'::jsonb,
    10, 2, true);
 
 -- ── Lección 1.3 Práctica: Preséntate ──────────────────────

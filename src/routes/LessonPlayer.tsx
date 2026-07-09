@@ -79,7 +79,7 @@ export default function LessonPlayer() {
 
   const exercise = exercises[currentIndex]
   const totalExercises = exercises.length
-  const progress = totalExercises > 0 ? (currentIndex / totalExercises) : 0
+  const progress = totalExercises > 0 ? ((currentIndex + 1) / totalExercises) : 0
   const canCheck = userAnswer.trim().length > 0
 
   const handleCheck = useCallback(() => {
