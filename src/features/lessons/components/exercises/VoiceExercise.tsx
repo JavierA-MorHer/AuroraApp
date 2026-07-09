@@ -112,7 +112,7 @@ export function VoiceExercise({ content, onTranscript, feedback, transcript }: P
       setRecordState('done')
     } catch (err) {
       console.error('STT Transcription error:', err)
-      setError('Hubo un problema al procesar tu pronunciación con IA.')
+      setError('Hubo un problema al procesar tu pronunciación.')
       setRecordState('idle')
     }
   }
@@ -226,7 +226,7 @@ export function VoiceExercise({ content, onTranscript, feedback, transcript }: P
             {recordState === 'recording'
               ? 'Escuchando... (toca para detener)'
               : recordState === 'transcribing'
-              ? 'Procesando tu voz con IA...'
+              ? 'Procesando tu voz...'
               : recordState === 'done'
               ? 'Grabado'
               : 'Toca para hablar'}
