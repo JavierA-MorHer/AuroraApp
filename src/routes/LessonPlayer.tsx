@@ -13,6 +13,7 @@ import { MultipleChoiceExercise } from '@/features/lessons/components/exercises/
 import { FillBlankExercise } from '@/features/lessons/components/exercises/FillBlankExercise'
 import { VoiceExercise } from '@/features/lessons/components/exercises/VoiceExercise'
 import { DictationExercise } from '@/features/lessons/components/exercises/DictationExercise'
+import { soundEffects } from '@/lib/soundEffects'
 
 interface ExerciseResult {
   exerciseId: string
@@ -94,6 +95,11 @@ export default function LessonPlayer() {
   const handleCheck = useCallback(() => {
     if (!exercise || !canCheck) return
     const { correct, score } = checkExercise(exercise, userAnswer)
+    if (correct) {
+      soundEffects.playSuccess()
+    } else {
+      soundEffects.playError()
+    }
     setFeedback(correct ? 'correct' : 'incorrect')
     setResults((prev) => [
       ...prev,
@@ -106,6 +112,7 @@ export default function LessonPlayer() {
     if (currentIndex >= totalExercises - 1) {
       await saveProgress()
       setPhase('complete')
+      soundEffects.playCompleted()
     } else {
       setCurrentIndex((i) => i + 1)
       setUserAnswer('')
@@ -183,6 +190,7 @@ export default function LessonPlayer() {
           code: rewardInfo.code || '',
           rarity: rewardInfo.rarity as RewardRarity,
         })
+        soundEffects.playUnlock()
       }
 
       // Invalidar caches para que Lessons y Home reflejen el nuevo estado

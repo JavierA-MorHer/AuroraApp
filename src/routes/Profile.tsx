@@ -15,6 +15,7 @@ import {
 import { ProfileAvatar } from '@/features/profile/components/ProfileAvatar'
 import { useProfile } from '@/features/profile/hooks/useProfile'
 import { useAuthStore } from '@/stores/useAuthStore'
+import { soundEffects } from '@/lib/soundEffects'
 
 const TOP_BAR_H = 60
 const BOTTOM_NAV_H = 70
@@ -42,6 +43,7 @@ export default function Profile() {
   const { user } = useAuthStore()
   const [showCurrent, setShowCurrent] = useState(false)
   const [showNew, setShowNew] = useState(false)
+  const [soundsEnabled, setSoundsEnabled] = useState(soundEffects.isSoundEnabled())
 
   const firstName: string = user?.user_metadata?.first_name ?? ''
   const lastName: string = user?.user_metadata?.last_name ?? ''
@@ -178,6 +180,31 @@ export default function Profile() {
                     </div>
                   </Stack>
                 </form>
+              </Card>
+            </Stack>
+
+            {/* Preferencias */}
+            <Stack gap={3}>
+              <SectionLabel>Preferencias</SectionLabel>
+              <Card>
+                <SegmentedControl
+                  label="Efectos de sonido"
+                  options={[
+                    { label: 'Activados', value: 'on' },
+                    { label: 'Silenciados', value: 'off' },
+                  ]}
+                  value={soundsEnabled ? 'on' : 'off'}
+                  onChange={(val) => {
+                    const isNowOn = val === 'on'
+                    if (isNowOn !== soundEffects.isSoundEnabled()) {
+                      soundEffects.toggleSound()
+                      setSoundsEnabled(isNowOn)
+                      if (isNowOn) {
+                        soundEffects.playSuccess()
+                      }
+                    }
+                  }}
+                />
               </Card>
             </Stack>
 

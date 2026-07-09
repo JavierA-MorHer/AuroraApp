@@ -9,6 +9,7 @@ import {
   tokens,
 } from '@/design-system'
 import { useRewards } from '@/features/rewards/hooks/useRewards'
+import { soundEffects } from '@/lib/soundEffects'
 
 const TOP_BAR_H = 60
 const BOTTOM_NAV_H = 70
@@ -101,6 +102,7 @@ export default function Rewards() {
             <RewardVault
               items={items}
               onClaim={(item) => {
+                soundEffects.playUnlock()
                 setPendingUnlock({
                   rewardId: item.id,
                   category: item.category!,
