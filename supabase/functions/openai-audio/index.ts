@@ -1,8 +1,18 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.7"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+async function computeHash(text: string, voice: string, speed: number): Promise<string> {
+  const rawKey = `${text}_${voice}_${speed}`
+  const encoder = new TextEncoder()
+  const data = encoder.encode(rawKey)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
 }
 
 serve(async (req) => {
@@ -20,10 +30,15 @@ serve(async (req) => {
       )
     }
 
+    // Inicializar el cliente administrador de Supabase para almacenar/recuperar la caché
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    const supabaseClient = createClient(supabaseUrl, supabaseServiceKey)
+
     const url = new URL(req.url)
     const action = url.searchParams.get('action')
 
-    // RUTA: TEXT TO SPEECH (TTS)
+    // RUTA: TEXT TO SPEECH (TTS) - CON CACHÉ
     if (action === 'tts') {
       const { text, voice = 'nova', speed = 1.0 } = await req.json()
 
@@ -34,6 +49,46 @@ serve(async (req) => {
         )
       }
 
+      const filename = `${await computeHash(text, voice, speed)}.mp3`
+      const bucketName = 'tts-cache'
+
+      // Intentar leer de la caché de Supabase Storage
+      let cachedBlob: Blob | null = null
+      try {
+        const { data: fileData, error: downloadError } = await supabaseClient
+          .storage
+          .from(bucketName)
+          .download(filename)
+
+        if (fileData && !downloadError) {
+          cachedBlob = fileData
+        } else if (downloadError) {
+          // Si el bucket no existe en absoluto, intentamos crearlo
+          const isErrorBucketNotFound = 
+            downloadError.message?.toLowerCase().includes('not found') || 
+            downloadError.message?.toLowerCase().includes('bucket')
+
+          if (isErrorBucketNotFound) {
+            console.log(`El bucket "${bucketName}" no existe. Creándolo de forma dinámica...`)
+            await supabaseClient.storage.createBucket(bucketName, { public: true })
+          }
+        }
+      } catch (err) {
+        console.warn('Error accediendo al tts-cache en storage. Procediendo con OpenAI...', err)
+      }
+
+      // Si existe caché, lo devolvemos directamente
+      if (cachedBlob) {
+        return new Response(cachedBlob, {
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'audio/mpeg',
+            'X-Cache': 'HIT',
+          },
+        })
+      }
+
+      // Si no hay caché, realizamos petición a OpenAI
       const response = await fetch('https://api.openai.com/v1/audio/speech', {
         method: 'POST',
         headers: {
@@ -57,10 +112,25 @@ serve(async (req) => {
       }
 
       const audioBlob = await response.blob()
+
+      // Guardar el audio generado en la caché para futuras peticiones
+      try {
+        await supabaseClient.storage
+          .from(bucketName)
+          .upload(filename, audioBlob, {
+            contentType: 'audio/mpeg',
+            cacheControl: '31536000',
+            upsert: true,
+          })
+      } catch (uploadErr) {
+        console.error('Error al subir el archivo generado al tts-cache:', uploadErr)
+      }
+
       return new Response(audioBlob, {
         headers: {
           ...corsHeaders,
           'Content-Type': 'audio/mpeg',
+          'X-Cache': 'MISS',
         },
       })
     }
