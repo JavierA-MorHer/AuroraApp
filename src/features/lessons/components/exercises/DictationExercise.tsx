@@ -1,9 +1,10 @@
-﻿import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { Volume2, Loader, Languages } from 'lucide-react'
 import { useThemeStore } from '@/stores/useThemeStore'
 import { tokens } from '@/design-system'
 import type { DictationContent } from '../../types'
 import { CheckCircle, XCircle } from 'lucide-react'
+import { playTTS } from '@/lib/audioService'
 
 interface Props {
   content: DictationContent
@@ -27,17 +28,16 @@ export function DictationExercise({ content, value, onChange, feedback }: Props)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const speak = () => {
-    if (!window.speechSynthesis) return
-    window.speechSynthesis.cancel()
-    const u = new SpeechSynthesisUtterance(content.audio_text)
-    u.lang = 'en-US'
-    u.rate = 0.8
-    u.pitch = 1
-    u.onstart = () => setSpeaking(true)
-    u.onend = () => setSpeaking(false)
-    u.onerror = () => setSpeaking(false)
-    window.speechSynthesis.speak(u)
+  const speak = async () => {
+    if (speaking) return
+    setSpeaking(true)
+    try {
+      await playTTS(content.audio_text, 'nova', 0.8)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setSpeaking(false)
+    }
   }
 
   const borderColor =

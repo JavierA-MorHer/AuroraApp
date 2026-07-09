@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react'
 import { Volume2, Loader } from 'lucide-react'
 import { useThemeStore } from '@/stores/useThemeStore'
 import { tokens } from '@/design-system/tokens'
+import { playTTS } from '@/lib/audioService'
 
 interface WordCardProps {
   word: string
@@ -19,18 +20,18 @@ export function WordCard({ word, translation, example, exampleEs, partOfSpeech, 
 
   const flip = () => setFlipped((f) => !f)
 
-  const speak = useCallback((e: React.MouseEvent) => {
+  const speak = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (!window.speechSynthesis || speaking) return
+    if (speaking) return
 
-    window.speechSynthesis.cancel()
-    const u = new SpeechSynthesisUtterance(word)
-    u.lang = 'en-US'
-    u.rate = 0.85
-    u.onstart = () => setSpeaking(true)
-    u.onend = () => setSpeaking(false)
-    u.onerror = () => setSpeaking(false)
-    window.speechSynthesis.speak(u)
+    setSpeaking(true)
+    try {
+      await playTTS(word, 'nova', 0.85)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setSpeaking(false)
+    }
   }, [word, speaking])
 
   return (
