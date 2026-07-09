@@ -1,5 +1,5 @@
 ﻿import { useRef, useEffect, useState } from 'react'
-import { Volume2, Loader } from 'lucide-react'
+import { Volume2, Loader, Languages } from 'lucide-react'
 import { useThemeStore } from '@/stores/useThemeStore'
 import { tokens } from '@/design-system'
 import type { DictationContent } from '../../types'
@@ -161,16 +161,12 @@ export function DictationExercise({ content, value, onChange, feedback }: Props)
 
       {/* Translation — shown after feedback so no spoiler */}
       {feedback !== 'none' && content.translation && (
-        <p style={{
-          fontFamily: tokens.font.body,
-          fontSize: 13,
-          color: c.textFaint,
-          margin: 0,
-          textAlign: 'center',
-          fontStyle: 'italic',
-        }}>
-          🇲🇽 {content.translation}
-        </p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+          <Languages size={13} color={c.textFaint} />
+          <span style={{ fontFamily: tokens.font.body, fontSize: 13, color: c.textFaint, fontStyle: 'italic' }}>
+            {content.translation}
+          </span>
+        </div>
       )}
 
       {/* Spin animation */}

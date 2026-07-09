@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect, useRef } from 'react'
-import { Mic, MicOff, RefreshCw } from 'lucide-react'
+import { Mic, MicOff, RefreshCw, Languages, Lightbulb } from 'lucide-react'
 import { useThemeStore } from '@/stores/useThemeStore'
 import { tokens } from '@/design-system'
 import type { VoiceContent } from '../../types'
@@ -126,28 +126,20 @@ export function VoiceExercise({ content, onTranscript, feedback, transcript }: P
           {content.target_phrase}
         </p>
         {content.translation && (
-          <p style={{
-            fontFamily: tokens.font.body,
-            fontSize: 13,
-            color: c.textFaint,
-            margin: '4px 0 0',
-            fontStyle: 'italic',
-          }}>
-            🇲🇽 {content.translation}
-          </p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, margin: '4px 0 0' }}>
+            <Languages size={13} color={c.textFaint} />
+            <span style={{ fontFamily: tokens.font.body, fontSize: 13, color: c.textFaint, fontStyle: 'italic' }}>
+              {content.translation}
+            </span>
+          </div>
         )}
         {content.tip && (
-          <p
-            style={{
-              fontFamily: tokens.font.body,
-              fontSize: 13,
-              color: c.textFaint,
-              margin: '8px 0 0',
-              fontStyle: 'italic',
-            }}
-          >
-            💡 {content.tip}
-          </p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, margin: '8px 0 0' }}>
+            <Lightbulb size={13} color={c.textFaint} />
+            <span style={{ fontFamily: tokens.font.body, fontSize: 13, color: c.textFaint, fontStyle: 'italic' }}>
+              {content.tip}
+            </span>
+          </div>
         )}
       </div>
 

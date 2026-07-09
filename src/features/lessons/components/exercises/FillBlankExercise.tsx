@@ -2,7 +2,7 @@
 import { useThemeStore } from '@/stores/useThemeStore'
 import { tokens } from '@/design-system'
 import type { FillBlankContent } from '../../types'
-import { CheckCircle, XCircle } from 'lucide-react'
+import { CheckCircle, XCircle, Languages } from 'lucide-react'
 
 interface Props {
   content: FillBlankContent
@@ -79,16 +79,12 @@ export function FillBlankExercise({ content, value, onChange, feedback }: Props)
 
       {/* Translation */}
       {content.translation && (
-        <p style={{
-          fontFamily: tokens.font.body,
-          fontSize: 13,
-          color: c.textFaint,
-          margin: '-16px 0 0',
-          textAlign: 'center',
-          fontStyle: 'italic',
-        }}>
-          🇲🇽 {content.translation}
-        </p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, margin: '-16px 0 0' }}>
+          <Languages size={13} color={c.textFaint} />
+          <span style={{ fontFamily: tokens.font.body, fontSize: 13, color: c.textFaint, fontStyle: 'italic' }}>
+            {content.translation}
+          </span>
+        </div>
       )}
 
       {/* Hint */}
