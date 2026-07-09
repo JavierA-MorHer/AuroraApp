@@ -1,9 +1,13 @@
 /**
  * Web Audio API based Synthesizer Service for Aurora UI Sound Effects.
  * Generates lightweight, instant, high-fidelity chimes programmatically with 0KB assets.
+ * 
+ * Optimized for Safari & mobile browser Autoplay policies by lazy-initializing 
+ * and resuming a single shared AudioContext upon user interactions.
  */
 class SoundEffectsService {
   private enabled = true
+  private ctx: AudioContext | null = null
 
   constructor() {
     if (typeof window !== 'undefined') {
@@ -24,9 +28,20 @@ class SoundEffectsService {
 
   private getAudioContext(): AudioContext | null {
     if (typeof window === 'undefined') return null
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext
-    if (!AudioContextClass) return null
-    return new AudioContextClass()
+    
+    if (!this.ctx) {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext
+      if (!AudioContextClass) return null
+      this.ctx = new AudioContextClass()
+    }
+
+    // Safari policies keep the context suspended until a direct click/touch triggers playback.
+    // We resume it programmatically here inside the user event handler execution stack.
+    if (this.ctx.state === 'suspended') {
+      this.ctx.resume().catch((err) => console.debug('AudioContext resume failed:', err))
+    }
+
+    return this.ctx
   }
 
   /**
