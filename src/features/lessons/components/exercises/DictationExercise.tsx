@@ -159,6 +159,20 @@ export function DictationExercise({ content, value, onChange, feedback }: Props)
         </p>
       )}
 
+      {/* Translation — shown after feedback so no spoiler */}
+      {feedback !== 'none' && content.translation && (
+        <p style={{
+          fontFamily: tokens.font.body,
+          fontSize: 13,
+          color: c.textFaint,
+          margin: 0,
+          textAlign: 'center',
+          fontStyle: 'italic',
+        }}>
+          🇲🇽 {content.translation}
+        </p>
+      )}
+
       {/* Spin animation */}
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>

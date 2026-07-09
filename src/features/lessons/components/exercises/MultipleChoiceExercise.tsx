@@ -80,6 +80,20 @@ export function MultipleChoiceExercise({ content, selected, onSelect, feedback }
         </p>
       </div>
 
+      {/* Translation */}
+      {content.translation && (
+        <p style={{
+          fontFamily: tokens.font.body,
+          fontSize: 13,
+          color: c.textFaint,
+          margin: '-8px 0 0',
+          textAlign: 'center',
+          fontStyle: 'italic',
+        }}>
+          🇲🇽 {content.translation}
+        </p>
+      )}
+
       {/* Options */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {content.options.map((option) => {

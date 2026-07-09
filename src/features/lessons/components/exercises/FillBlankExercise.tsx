@@ -77,6 +77,20 @@ export function FillBlankExercise({ content, value, onChange, feedback }: Props)
         </span>
       </div>
 
+      {/* Translation */}
+      {content.translation && (
+        <p style={{
+          fontFamily: tokens.font.body,
+          fontSize: 13,
+          color: c.textFaint,
+          margin: '-16px 0 0',
+          textAlign: 'center',
+          fontStyle: 'italic',
+        }}>
+          🇲🇽 {content.translation}
+        </p>
+      )}
+
       {/* Hint */}
       {content.hint && (
         <p

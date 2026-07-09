@@ -125,17 +125,28 @@ export function VoiceExercise({ content, onTranscript, feedback, transcript }: P
         >
           {content.target_phrase}
         </p>
+        {content.translation && (
+          <p style={{
+            fontFamily: tokens.font.body,
+            fontSize: 13,
+            color: c.textFaint,
+            margin: '4px 0 0',
+            fontStyle: 'italic',
+          }}>
+            🇲🇽 {content.translation}
+          </p>
+        )}
         {content.tip && (
           <p
             style={{
               fontFamily: tokens.font.body,
               fontSize: 13,
               color: c.textFaint,
-              margin: 0,
+              margin: '8px 0 0',
               fontStyle: 'italic',
             }}
           >
-            {content.tip}
+            💡 {content.tip}
           </p>
         )}
       </div>

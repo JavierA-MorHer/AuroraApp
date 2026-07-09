@@ -43,6 +43,7 @@ export interface MultipleChoiceContent {
   options: string[]
   answer: string
   explanation?: string
+  translation?: string
 }
 
 export interface FillBlankContent {
@@ -50,18 +51,21 @@ export interface FillBlankContent {
   answer: string
   hint: string
   explanation?: string
+  translation?: string
 }
 
 export interface VoiceContent {
   target_phrase: string
   tip: string
   explanation?: string
+  translation?: string
 }
 
 export interface DictationContent {
   audio_text: string
   prompt: string
   explanation?: string
+  translation?: string
 }
 
 export interface Exercise {
