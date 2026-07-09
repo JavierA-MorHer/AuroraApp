@@ -92,7 +92,7 @@ export function DictationExercise({ content, value, onChange, feedback }: Props)
             boxShadow: speaking
               ? `0 0 0 8px ${c.primary}22, 0 0 24px ${c.glow}55`
               : c.shadowSm,
-            transition: `all ${tokens.motion.duration.normal} ease`,
+            transition: `all ${tokens.motion.duration.base} ease`,
           }}
         >
           {speaking ? (

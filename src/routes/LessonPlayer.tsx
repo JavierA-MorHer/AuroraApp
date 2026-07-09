@@ -1,6 +1,6 @@
 ﻿import { useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, X, Star } from 'lucide-react'
+import { X, Star } from 'lucide-react'
 import { useThemeStore } from '@/stores/useThemeStore'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { tokens, Button, Stack } from '@/design-system'
@@ -300,7 +300,7 @@ export default function LessonPlayer() {
   // ─── Exercise screen ───
   const isFeedbackCorrect = feedback === 'correct'
   const explanation = exercise?.content
-    ? ((exercise.content as Record<string, unknown>).explanation as string | undefined) ?? null
+    ? ((exercise.content as unknown as Record<string, unknown>).explanation as string | undefined) ?? null
     : null
 
   return (
@@ -555,7 +555,7 @@ export default function LessonPlayer() {
               ? isFeedbackCorrect ? `${c.success}44` : `${c.danger}44`
               : c.border
           }`,
-          transition: `background ${tokens.motion.duration.normal} ease, border-color ${tokens.motion.duration.normal} ease`,
+          transition: `background ${tokens.motion.duration.base} ease, border-color ${tokens.motion.duration.base} ease`,
           zIndex: 100,
         }}
       >

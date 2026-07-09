@@ -164,7 +164,7 @@ export function VoiceExercise({ content, onTranscript, feedback, transcript }: P
                 recordState === 'recording'
                   ? `0 0 0 8px ${c.primary}22, 0 0 24px ${c.glow}66`
                   : c.shadowSm,
-              transition: `all ${tokens.motion.duration.normal} ease`,
+              transition: `all ${tokens.motion.duration.base} ease`,
             }}
           >
             {recordState === 'recording' ? (
