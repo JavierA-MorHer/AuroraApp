@@ -60,6 +60,7 @@ export default function Profile() {
     profile,
     uploadAvatar,
     uploading,
+    avatarSaved,
   } = useProfile()
 
   const pErr = profileForm.formState.errors
@@ -93,13 +94,21 @@ export default function Profile() {
               Perfil
             </h1>
 
-            <ProfileAvatar
-              initials={initials}
-              avatarUrl={profile?.avatar_url}
-              onUpload={uploadAvatar}
-              uploading={uploading}
-              size={88}
-            />
+            {/* Avatar */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+              <ProfileAvatar
+                initials={initials}
+                avatarUrl={profile?.avatar_url}
+                onUpload={uploadAvatar}
+                uploading={uploading}
+                size={88}
+              />
+              {avatarSaved && (
+                <p style={{ fontFamily: tokens.font.body, fontSize: 13, color: c.success, margin: '4px 0 0 0', fontWeight: 500 }}>
+                  ¡Foto de perfil actualizada con éxito!
+                </p>
+              )}
+            </div>
 
             {/* Información personal */}
             <Stack gap={3}>

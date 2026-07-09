@@ -105,6 +105,7 @@ export function useProfile() {
   }
 
   const [uploading, setUploading] = useState(false)
+  const [avatarSaved, setAvatarSaved] = useState(false)
 
   async function uploadAvatar(file: File) {
     if (!user) return
@@ -135,9 +136,11 @@ export function useProfile() {
       })
 
       await queryClient.invalidateQueries({ queryKey: ['profile', user.id] })
+      setAvatarSaved(true)
+      setTimeout(() => setAvatarSaved(false), 2500)
     } catch (err) {
       console.error('Error uploading avatar:', err)
-      alert('Hubo un error al subir la foto de perfil.')
+      alert('Hubo un error al subir la foto de perfil. Asegúrate de ejecutar la migración SQL en Supabase.')
     } finally {
       setUploading(false)
     }
@@ -156,5 +159,6 @@ export function useProfile() {
     profile,
     uploadAvatar,
     uploading,
+    avatarSaved,
   }
 }
