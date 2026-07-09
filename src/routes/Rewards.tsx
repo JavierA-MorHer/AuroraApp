@@ -1,10 +1,9 @@
-import { Gem, Sparkles } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 import { useThemeStore } from '@/stores/useThemeStore'
 import {
   Container,
   Stack,
   Card,
-  Button,
   RewardVault,
   RewardUnlockModal,
   tokens,
@@ -19,7 +18,7 @@ export default function Rewards() {
   const {
     items,
     pendingUnlock,
-    triggerUnlock,
+    setPendingUnlock,
     saveToVault,
     closeUnlock,
   } = useRewards()
@@ -98,33 +97,21 @@ export default function Rewards() {
             )}
 
             {/* Vault */}
-            <RewardVault items={items} />
+            <RewardVault
+              items={items}
+              onClaim={(item) => {
+                setPendingUnlock({
+                  rewardId: item.id,
+                  category: item.category!,
+                  title: item.title!,
+                  subtitle: item.subtitle!,
+                  code: item.code ?? '',
+                  rarity: item.rarity!,
+                })
+              }}
+            />
 
-            {/* Demo: simular desbloqueo */}
-            <Card>
-              <Stack gap={3}>
-                <p
-                  style={{
-                    fontFamily: tokens.font.mono,
-                    fontSize: 11,
-                    letterSpacing: 1.5,
-                    textTransform: 'uppercase',
-                    color: c.textFaint,
-                    margin: 0,
-                  }}
-                >
-                  Demo
-                </p>
-                <p style={{ fontFamily: tokens.font.body, fontSize: 13, color: c.textMuted, margin: 0 }}>
-                  Simula completar una lección y recibir tu carta de recompensa.
-                </p>
-                <div style={{ display: 'grid' }}>
-                  <Button variant="glow" icon={Gem} onClick={triggerUnlock}>
-                    Simular desbloqueo
-                  </Button>
-                </div>
-              </Stack>
-            </Card>
+
           </Stack>
         </div>
       </Container>
@@ -138,6 +125,7 @@ export default function Rewards() {
           title={pendingUnlock.title}
           subtitle={pendingUnlock.subtitle}
           code={pendingUnlock.code}
+          rarity={pendingUnlock.rarity}
           onSaveToVault={saveToVault}
         />
       )}

@@ -117,16 +117,43 @@ export function buildRewardCardSvg(
   title: string,
   subtitle: string,
   code: string,
-  mode: 'dark' | 'light'
+  mode: 'dark' | 'light',
+  rarity?: RewardRarity
 ): string {
   const cat = REWARD_CATEGORIES[category]
+  const activeRarity = rarity ?? cat.rarity
   const [g1, g2] = cat.gradient
-  const rarityRing = cat.rarity === 'unique' ? 3 : cat.rarity === 'common' ? 1.5 : 2
+  const rarityRing = activeRarity === 'unique' ? 3 : activeRarity === 'common' ? 1.5 : 2
   const w = 320
   const h = 460
-  const bgBase = mode === 'dark' ? '#1A0E2E' : '#FBF7FF'
+  const bgBase = mode === 'dark' ? '#1A0E2E' : '#FFFFFF'
   const textColor = mode === 'dark' ? '#F5F0FF' : '#2B1B42'
   const mutedColor = mode === 'dark' ? '#B8A9D9' : '#6B5A85'
+
+  // Helper para hacer wrap automático del texto de descripción
+  const wrapText = (text: string, maxLen = 38): string[] => {
+    const words = text.split(' ')
+    const lines: string[] = []
+    let currentLine = ''
+    
+    for (const word of words) {
+      if ((currentLine + ' ' + word).trim().length <= maxLen) {
+        currentLine = (currentLine + ' ' + word).trim()
+      } else {
+        if (currentLine) lines.push(currentLine)
+        currentLine = word
+      }
+    }
+    if (currentLine) lines.push(currentLine)
+    return lines
+  }
+
+  const descLines = wrapText(subtitle || '', 36)
+  let descTspans = ''
+  const startY = descLines.length > 1 ? 352 : 360
+  descLines.forEach((line, index) => {
+    descTspans += `  <text x="${w / 2}" y="${startY + index * 16}" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="${mutedColor}">${escapeXml(line)}</text>\n`
+  })
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
   <defs>
@@ -134,22 +161,50 @@ export function buildRewardCardSvg(
       <stop offset="0%" stop-color="${g1}" />
       <stop offset="100%" stop-color="${g2}" />
     </linearGradient>
-    <radialGradient id="illusBg" cx="50%" cy="50%" r="60%">
-      <stop offset="0%" stop-color="${g2}" stop-opacity="0.9" />
-      <stop offset="100%" stop-color="${g1}" stop-opacity="0.5" />
+    <radialGradient id="illusBg" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="${g2}" />
+      <stop offset="100%" stop-color="${g1}" />
     </radialGradient>
   </defs>
+  
+  <!-- Cuerpo base y marco exterior gradiente acorde al design system -->
   <rect width="${w}" height="${h}" rx="24" fill="${bgBase}" />
-  <rect x="3" y="3" width="${w - 6}" height="${h - 6}" rx="21" fill="none" stroke="url(#cardBg)" stroke-width="${rarityRing * 2}" />
-  <rect x="20" y="20" width="${w - 40}" height="${h - 110}" rx="16" fill="url(#illusBg)" />
-  <g transform="translate(${w / 2 - 60}, 60) scale(1.2)">
+  <rect x="${rarityRing / 2}" y="${rarityRing / 2}" width="${w - rarityRing}" height="${h - rarityRing}" rx="${24 - rarityRing / 2}" fill="none" stroke="url(#cardBg)" stroke-width="${rarityRing}" />
+  
+  <!-- Contenedor de Ilustración (Proporción 1.1) -->
+  <rect x="16" y="16" width="288" height="262" rx="14" fill="url(#illusBg)" />
+  
+  <!-- Partículas de Starfield -->
+  <circle cx="50" cy="50" r="1" fill="#FFFFFF" opacity="0.4" />
+  <circle cx="280" cy="180" r="0.8" fill="#FFFFFF" opacity="0.6" />
+  <circle cx="210" cy="80" r="1.2" fill="#FFFFFF" opacity="0.5" />
+  <circle cx="260" cy="210" r="0.8" fill="#FFFFFF" opacity="0.7" />
+  <circle cx="80" cy="110" r="1" fill="#FFFFFF" opacity="0.5" />
+  <circle cx="150" cy="40" r="1.2" fill="#FFFFFF" opacity="0.4" />
+  <circle cx="110" cy="230" r="0.8" fill="#FFFFFF" opacity="0.6" />
+  <circle cx="40" cy="190" r="1" fill="#FFFFFF" opacity="0.5" />
+  
+  <!-- Ícono Ilustrativo (Escalado y centrado al 62% del ancho) -->
+  <g transform="translate(71, 58) scale(1.78)">
     ${ILLUSTRATION_STRINGS[category]}
   </g>
-  <text x="${w / 2}" y="${h - 168}" text-anchor="middle" font-family="Georgia, serif" font-size="13" letter-spacing="3" fill="#ffffffcc">${cat.label.toUpperCase()} · ${RARITY_LABEL[cat.rarity].toUpperCase()}</text>
-  <text x="${w / 2}" y="${h - 120}" text-anchor="middle" font-family="Georgia, serif" font-size="24" font-weight="600" fill="${textColor}">${escapeXml(title)}</text>
-  <text x="${w / 2}" y="${h - 92}" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="${mutedColor}">${escapeXml(subtitle)}</text>
-  <line x1="32" y1="${h - 64}" x2="${w - 32}" y2="${h - 64}" stroke="${mutedColor}" stroke-opacity="0.3" stroke-dasharray="3,4" />
-  <text x="${w / 2}" y="${h - 38}" text-anchor="middle" font-family="'Courier New', monospace" font-size="13" letter-spacing="2" fill="${textColor}">${escapeXml(code)}</text>
-  <text x="${w / 2}" y="${h - 18}" text-anchor="middle" font-family="Arial, sans-serif" font-size="9.5" letter-spacing="1.5" fill="${mutedColor}">AURORA · CARTA DE RECOMPENSA</text>
+  
+  <!-- Información del catálogo y Rareza -->
+  <text x="${w / 2}" y="298" text-anchor="middle" font-family="Courier New, monospace" font-size="10.5" letter-spacing="1.5" fill="#ffffffaa">${cat.label.toUpperCase()} · ${RARITY_LABEL[activeRarity].toUpperCase()}</text>
+  
+  <!-- Título principal -->
+  <text x="${w / 2}" y="328" text-anchor="middle" font-family="Georgia, serif" font-weight="600" font-size="20" fill="${textColor}">${escapeXml(title)}</text>
+  
+  <!-- Descripción corta con wrap de líneas -->
+${descTspans}  
+  <!-- Divisor punteado -->
+  <line x1="32" y1="398" x2="${w - 32}" y2="398" stroke="${mutedColor}" stroke-opacity="0.3" stroke-width="1" stroke-dasharray="3,4" />
+  
+  <!-- Código de cupón canjeable -->
+  <text x="${w / 2}" y="422" text-anchor="middle" font-family="Courier New, monospace" font-size="12" font-weight="600" letter-spacing="1.5" fill="${textColor}">${escapeXml(code)}</text>
+  
+  <!-- Pie de Carta -->
+  <text x="${w / 2}" y="444" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" letter-spacing="1" fill="${mutedColor}">AURORA · CARTA DE RECOMPENSA</text>
 </svg>`
 }
+

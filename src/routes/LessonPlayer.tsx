@@ -1,10 +1,11 @@
-﻿import { useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { X, Star } from 'lucide-react'
 import { useThemeStore } from '@/stores/useThemeStore'
 import { useAuthStore } from '@/stores/useAuthStore'
-import { tokens, Button, Stack } from '@/design-system'
+import { tokens, Button, Stack, RewardUnlockModal } from '@/design-system'
+import type { RewardCategory, RewardRarity } from '@/design-system'
 import { useLesson } from '@/features/lessons/hooks/useLesson'
 import { supabase } from '@/lib/supabase'
 import type { Exercise, MultipleChoiceContent, FillBlankContent, VoiceContent, DictationContent } from '@/features/lessons/types'
@@ -76,6 +77,14 @@ export default function LessonPlayer() {
   const [results, setResults] = useState<ExerciseResult[]>([])
   const [saving, setSaving] = useState(false)
   const [showExitDialog, setShowExitDialog] = useState(false)
+  const [unlockedReward, setUnlockedReward] = useState<{
+    id: string
+    category: RewardCategory
+    title: string
+    subtitle: string
+    code: string
+    rarity: RewardRarity
+  } | null>(null)
 
   const exercise = exercises[currentIndex]
   const totalExercises = exercises.length
@@ -109,6 +118,12 @@ export default function LessonPlayer() {
     if (!user || !lessonId) return
     setSaving(true)
     try {
+      // 1. Obtener recompensas desbloqueadas antes de guardar el progreso
+      const { data: preRewards } = await supabase
+        .from('user_rewards')
+        .select('reward_id')
+      const preIds = new Set((preRewards ?? []).map((r) => r.reward_id))
+
       const allResults = [...results]
       const avgScore = Math.round(allResults.reduce((s, r) => s + r.score, 0) / allResults.length)
       const totalXP = allResults.reduce((s, r) => s + (r.correct ? r.xpReward : 0), 0)
@@ -148,6 +163,25 @@ export default function LessonPlayer() {
           p_user_id: user.id,
           p_xp_earned: totalXP,
           p_minutes_studied: Math.round(allResults.length * 1.5),
+        })
+      }
+
+      // 2. Obtener recompensas desbloqueadas después del progreso y verificar trigger del backend
+      const { data: postRewards } = await supabase
+        .from('user_rewards')
+        .select('reward_id, reward:rewards(*)')
+      
+      const newUnlock = postRewards?.find((r) => !preIds.has(r.reward_id))
+
+      if (newUnlock && newUnlock.reward) {
+        const rewardInfo = newUnlock.reward as any
+        setUnlockedReward({
+          id: rewardInfo.id,
+          category: rewardInfo.category as RewardCategory,
+          title: rewardInfo.title,
+          subtitle: rewardInfo.description || '',
+          code: rewardInfo.code || '',
+          rarity: rewardInfo.rarity as RewardRarity,
         })
       }
 
@@ -299,6 +333,29 @@ export default function LessonPlayer() {
             {saving ? 'Guardando...' : 'Volver a lecciones'}
           </Button>
         </div>
+
+        {unlockedReward && (
+          <RewardUnlockModal
+            open={!!unlockedReward}
+            onClose={() => setUnlockedReward(null)}
+            category={unlockedReward.category}
+            title={unlockedReward.title}
+            subtitle={unlockedReward.subtitle}
+            code={unlockedReward.code}
+            rarity={unlockedReward.rarity}
+            onSaveToVault={async () => {
+              if (user?.id && unlockedReward?.id) {
+                await supabase
+                  .from('user_rewards')
+                  .update({ is_redeemed: true })
+                  .eq('user_id', user.id)
+                  .eq('reward_id', unlockedReward.id)
+              }
+              await queryClient.invalidateQueries({ queryKey: ['rewards', user?.id] })
+              setUnlockedReward(null)
+            }}
+          />
+        )}
       </div>
     )
   }

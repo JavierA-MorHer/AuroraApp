@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/useAuthStore'
 import type { RewardItem } from '../types'
-import type { RewardCategory } from '@/design-system'
+import type { RewardCategory, RewardRarity } from '@/design-system'
 
 type RewardRow = {
   id: string
@@ -12,6 +12,7 @@ type RewardRow = {
   unlock_hint: string | null
   category: string
   code: string | null
+  rarity: string
   is_active: boolean
   display_order: number
 }
@@ -24,6 +25,7 @@ export interface PendingUnlock {
   title: string
   subtitle: string
   code: string
+  rarity: RewardRarity
 }
 
 export function useRewards() {
@@ -31,9 +33,19 @@ export function useRewards() {
   const queryClient = useQueryClient()
   const [pendingUnlock, setPendingUnlock] = useState<PendingUnlock | null>(null)
 
-  const { data: items = [], isLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['rewards', user?.id],
     queryFn: async () => {
+      // 1. Ejecutar de manera retroactiva la evaluación en el servidor si hay usuario autenticado
+      if (user?.id) {
+        try {
+          await supabase.rpc('check_and_unlock_rewards_for_user', { p_user_id: user.id })
+        } catch (err) {
+          console.warn('Error evaluating retroactive rewards:', err)
+        }
+      }
+
+      // 2. Traer el catálogo y las recompensas desbloqueadas del usuario
       const [rewardsResult, userRewardsResult] = await Promise.all([
         supabase.from('rewards').select('*').eq('is_active', true).order('display_order'),
         supabase.from('user_rewards').select('reward_id, is_redeemed, unlocked_at'),
@@ -46,39 +58,38 @@ export function useRewards() {
 
       const earnedMap = new Map(userRewardRows.map((r) => [r.reward_id, r]))
 
-      return rewardRows.map((reward): RewardItem => {
-        const earned = earnedMap.get(reward.id)
+      const mappedItems = rewardRows.map((reward): RewardItem => {
+        const earnedRow = earnedMap.get(reward.id)
+        const hasRecord = !!earnedRow
+        const isClaimed = hasRecord && earnedRow.is_redeemed
+
         return {
           id: reward.id,
-          earned: !!earned,
-          category: earned ? (reward.category as RewardCategory) : undefined,
-          title: earned ? reward.title : undefined,
-          subtitle: earned ? (reward.description ?? undefined) : undefined,
-          code: earned ? (reward.code ?? undefined) : undefined,
-          unlockHint: !earned ? (reward.unlock_hint ?? undefined) : undefined,
+          earned: isClaimed,
+          unclaimed: hasRecord && !earnedRow.is_redeemed,
+          category: reward.category as RewardCategory,
+          title: reward.title,
+          subtitle: reward.description ?? undefined,
+          code: hasRecord ? (reward.code ?? undefined) : undefined,
+          unlockHint: !hasRecord ? (reward.unlock_hint ?? undefined) : undefined,
+          rarity: reward.rarity as RewardRarity,
         }
       })
+
+      return { items: mappedItems, rawRewards: rewardRows }
     },
   })
 
-  function triggerUnlock() {
-    const next = (items as RewardItem[]).find((i) => !i.earned)
-    if (!next) return
-    setPendingUnlock({
-      rewardId: next.id,
-      category: 'surprise',
-      title: 'Recompensa desbloqueada',
-      subtitle: 'Demo de desbloqueo',
-      code: 'AURORA-DEMO',
-    })
-  }
+  const items = data?.items ?? []
 
   async function saveToVault() {
     if (!pendingUnlock || !user) return
-    await supabase.from('user_rewards').insert({
-      user_id: user.id,
-      reward_id: pendingUnlock.rewardId,
-    })
+    await supabase
+      .from('user_rewards')
+      .update({ is_redeemed: true })
+      .eq('user_id', user.id)
+      .eq('reward_id', pendingUnlock.rewardId)
+
     queryClient.invalidateQueries({ queryKey: ['rewards', user.id] })
     setPendingUnlock(null)
   }
@@ -96,9 +107,9 @@ export function useRewards() {
     pendingUnlock,
     earnedCount,
     totalCount,
-    triggerUnlock,
     setPendingUnlock,
     saveToVault,
     closeUnlock,
   }
 }
+

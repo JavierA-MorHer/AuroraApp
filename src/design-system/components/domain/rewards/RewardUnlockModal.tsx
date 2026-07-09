@@ -6,7 +6,7 @@ import { Button } from '../../primitives/Button'
 import { RewardCard } from './RewardCard'
 import { ParticleBurst } from './ParticleBurst'
 import { REWARD_CATEGORIES } from './rewardCategories'
-import type { RewardCategory } from './rewardCategories'
+import type { RewardCategory, RewardRarity } from './rewardCategories'
 
 interface RewardUnlockModalProps {
   open: boolean
@@ -15,6 +15,7 @@ interface RewardUnlockModalProps {
   title: string
   subtitle: string
   code: string
+  rarity?: RewardRarity
   onSaveToVault?: () => void
 }
 
@@ -25,6 +26,7 @@ export function RewardUnlockModal({
   title,
   subtitle,
   code,
+  rarity,
   onSaveToVault,
 }: RewardUnlockModalProps) {
   const { c } = useThemeStore()
@@ -84,6 +86,7 @@ export function RewardUnlockModal({
               subtitle={subtitle}
               code={code}
               size={230}
+              rarity={rarity}
             />
           </div>
         </div>

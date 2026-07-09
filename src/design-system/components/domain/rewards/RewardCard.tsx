@@ -9,7 +9,7 @@ import {
   RARITY_LABEL,
   buildRewardCardSvg,
 } from './rewardCategories'
-import type { RewardCategory } from './rewardCategories'
+import type { RewardCategory, RewardRarity } from './rewardCategories'
 
 interface RewardCardProps {
   category?: RewardCategory
@@ -17,6 +17,7 @@ interface RewardCardProps {
   subtitle: string
   code: string
   size?: number
+  rarity?: RewardRarity
 }
 
 export function RewardCard({
@@ -25,25 +26,55 @@ export function RewardCard({
   subtitle,
   code,
   size = 220,
+  rarity,
 }: RewardCardProps) {
   const { c, mode } = useThemeStore()
   const cardId = useRef(`card-${Math.random().toString(36).slice(2, 9)}`).current
   const cat = REWARD_CATEGORIES[category]
+  const activeRarity = rarity ?? cat.rarity
   const [g1, g2] = cat.gradient
   const { Illustration } = cat
-  const rarityRing = cat.rarity === 'unique' ? 3 : cat.rarity === 'common' ? 1.5 : 2
+  const rarityRing = activeRarity === 'unique' ? 3 : activeRarity === 'common' ? 1.5 : 2
 
   function handleDownload() {
-    const svgString = buildRewardCardSvg(category, title, subtitle, code, mode)
-    const blob = new Blob([svgString], { type: 'image/svg+xml' })
+    const svgString = buildRewardCardSvg(category, title, subtitle, code, mode, activeRarity)
+    const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' })
     const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `aurora-carta-${category}-${code}.svg`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+    
+    const img = new Image()
+    img.src = url
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 320
+      canvas.height = 460
+      const ctx = canvas.getContext('2d')
+      if (ctx) {
+        ctx.clearRect(0, 0, 320, 460)
+        ctx.drawImage(img, 0, 0, 320, 460)
+        try {
+          const pngUrl = canvas.toDataURL('image/png')
+          const a = document.createElement('a')
+          a.href = pngUrl
+          a.download = `aurora-carta-${category}-${code}.png`
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+        } catch (err) {
+          console.error('Error generating PNG', err)
+          // Fallback to SVG download if canvas export fails
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `aurora-carta-${category}-${code}.svg`
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+        }
+      }
+      URL.revokeObjectURL(url)
+    }
+    img.onerror = () => {
+      URL.revokeObjectURL(url)
+    }
   }
 
   const bgColor = mode === 'dark' ? c.bgDeep : '#FFFFFF'
@@ -100,7 +131,7 @@ export function RewardCard({
             textAlign: 'center',
           }}
         >
-          {cat.label.toUpperCase()} · {RARITY_LABEL[cat.rarity].toUpperCase()}
+          {cat.label.toUpperCase()} · {RARITY_LABEL[activeRarity].toUpperCase()}
         </span>
         <h3
           style={{
@@ -138,3 +169,4 @@ export function RewardCard({
     </div>
   )
 }
+
