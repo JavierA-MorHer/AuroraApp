@@ -3,19 +3,18 @@ import { Save, LogOut, Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
 import { useThemeStore } from '@/stores/useThemeStore'
 import {
-  Page,
   Container,
   Stack,
   Card,
   Button,
   Input,
   AlertDialog,
+  SegmentedControl,
   tokens,
 } from '@/design-system'
-import { TopBar } from '@/features/navigation/components/TopBar'
-import { BottomNav } from '@/features/navigation/components/BottomNav'
 import { ProfileAvatar } from '@/features/profile/components/ProfileAvatar'
 import { useProfile } from '@/features/profile/hooks/useProfile'
+import { useAuthStore } from '@/stores/useAuthStore'
 
 const TOP_BAR_H = 60
 const BOTTOM_NAV_H = 70
@@ -40,8 +39,13 @@ function SectionLabel({ children }: { children: string }) {
 
 export default function Profile() {
   const { c } = useThemeStore()
+  const { user } = useAuthStore()
   const [showCurrent, setShowCurrent] = useState(false)
   const [showNew, setShowNew] = useState(false)
+
+  const firstName: string = user?.user_metadata?.first_name ?? ''
+  const lastName: string = user?.user_metadata?.last_name ?? ''
+  const initials = [firstName[0], lastName[0]].filter(Boolean).join('').toUpperCase() || '?'
 
   const {
     profileForm,
@@ -59,9 +63,7 @@ export default function Profile() {
   const wErr = passwordForm.formState.errors
 
   return (
-    <Page padding="0">
-      <TopBar initials="NV" name="Nayeli Valadez" streak={4} />
-
+    <>
       <Container size="sm">
         <div
           style={{
@@ -89,7 +91,7 @@ export default function Profile() {
             </h1>
 
             {/* Avatar */}
-            <ProfileAvatar initials="MJ" size={88} />
+            <ProfileAvatar initials={initials} size={88} />
 
             {/* Información personal */}
             <Stack gap={3}>
@@ -126,6 +128,23 @@ export default function Profile() {
                         />
                       )}
                     />
+
+                    <Controller
+                      name="gender"
+                      control={profileForm.control}
+                      render={({ field }) => (
+                        <SegmentedControl
+                          label="Género"
+                          options={[
+                            { label: 'Hombre', value: 'male' },
+                            { label: 'Mujer', value: 'female' },
+                          ]}
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      )}
+                    />
+
                     {profileSaved && (
                       <p style={{ fontFamily: tokens.font.body, fontSize: 13, color: c.success, margin: 0 }}>
                         Cambios guardados correctamente.
@@ -282,8 +301,6 @@ export default function Profile() {
         </div>
       </Container>
 
-      <BottomNav />
-
       <AlertDialog
         open={signOutDialogOpen}
         onClose={() => setSignOutDialogOpen(false)}
@@ -294,6 +311,6 @@ export default function Profile() {
         confirmLabel="Cerrar sesión"
         cancelLabel="Cancelar"
       />
-    </Page>
+    </>
   )
 }

@@ -76,7 +76,7 @@ export function BottomNav() {
             >
               <Icon
                 size={20}
-                color={active ? c.primary : c.textFaint}
+                color={active ? '#fff' : c.textFaint}
                 strokeWidth={active ? 2.5 : 1.8}
               />
             </div>
@@ -85,7 +85,7 @@ export function BottomNav() {
                 fontFamily: tokens.font.body,
                 fontSize: 10,
                 fontWeight: active ? 700 : 500,
-                color: active ? c.primary : c.textFaint,
+                color: active ? '#fff' : c.textFaint,
                 letterSpacing: 0.2,
               }}
             >

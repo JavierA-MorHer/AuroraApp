@@ -1,7 +1,6 @@
 import { Gem, Sparkles } from 'lucide-react'
 import { useThemeStore } from '@/stores/useThemeStore'
 import {
-  Page,
   Container,
   Stack,
   Card,
@@ -10,8 +9,6 @@ import {
   RewardUnlockModal,
   tokens,
 } from '@/design-system'
-import { TopBar } from '@/features/navigation/components/TopBar'
-import { BottomNav } from '@/features/navigation/components/BottomNav'
 import { useRewards } from '@/features/rewards/hooks/useRewards'
 
 const TOP_BAR_H = 60
@@ -30,9 +27,7 @@ export default function Rewards() {
   const hasNextUnlock = items.some((i) => !i.earned)
 
   return (
-    <Page padding="0">
-      <TopBar initials="NV" name="Nayeli Valadez" streak={4} />
-
+    <>
       <Container size="sm">
         <div
           style={{
@@ -134,8 +129,6 @@ export default function Rewards() {
         </div>
       </Container>
 
-      <BottomNav />
-
       {/* Unlock celebration modal */}
       {pendingUnlock && (
         <RewardUnlockModal
@@ -148,6 +141,6 @@ export default function Rewards() {
           onSaveToVault={saveToVault}
         />
       )}
-    </Page>
+    </>
   )
 }

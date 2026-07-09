@@ -2,68 +2,11 @@ import { useState } from 'react'
 import { Controller } from 'react-hook-form'
 import { Sparkles, Eye, EyeOff, LogIn, UserPlus } from 'lucide-react'
 import { useThemeStore } from '@/stores/useThemeStore'
-import { Card, Stack, Button, Input, tokens } from '@/design-system'
+import { Card, Stack, Button, Input, SegmentedControl, tokens } from '@/design-system'
 import { useLogin } from '../hooks/useLogin'
 import { useSignUp } from '../hooks/useSignUp'
 
 type AuthMode = 'login' | 'signup'
-
-function ModeToggle({
-  mode,
-  onChange,
-}: {
-  mode: AuthMode
-  onChange: (m: AuthMode) => void
-}) {
-  const { c } = useThemeStore()
-
-  const tabStyle = (active: boolean): React.CSSProperties => ({
-    flex: 1,
-    fontFamily: tokens.font.body,
-    fontSize: 13,
-    fontWeight: 600,
-    padding: '8px 0',
-    borderRadius: tokens.radius.full,
-    border: 'none',
-    cursor: 'pointer',
-    background: active ? c.primary : 'transparent',
-    color: active ? '#fff' : c.textMuted,
-    transition: `all ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}`,
-    minHeight: 38,
-  })
-
-  return (
-    <div
-      style={{
-        display: 'flex',
-        gap: 4,
-        background: c.bgDeep,
-        padding: 4,
-        borderRadius: tokens.radius.full,
-        marginBottom: 24,
-      }}
-    >
-      <button
-        type="button"
-        className="aurora-focusable"
-        aria-selected={mode === 'login'}
-        onClick={() => onChange('login')}
-        style={tabStyle(mode === 'login')}
-      >
-        Iniciar sesión
-      </button>
-      <button
-        type="button"
-        className="aurora-focusable"
-        aria-selected={mode === 'signup'}
-        onClick={() => onChange('signup')}
-        style={tabStyle(mode === 'signup')}
-      >
-        Crear cuenta
-      </button>
-    </div>
-  )
-}
 
 export function LoginForm() {
   const { c } = useThemeStore()
@@ -153,7 +96,16 @@ export function LoginForm() {
 
       {/* Card */}
       <Card glow padding={32}>
-        <ModeToggle mode={mode} onChange={handleModeChange} />
+        <div style={{ marginBottom: 24 }}>
+          <SegmentedControl
+            options={[
+              { label: 'Iniciar sesión', value: 'login' },
+              { label: 'Crear cuenta', value: 'signup' },
+            ]}
+            value={mode}
+            onChange={(v) => handleModeChange(v as AuthMode)}
+          />
+        </div>
 
         {/* Login form */}
         {isLogin && (

@@ -4,14 +4,26 @@ import { tokens } from '@/design-system/tokens'
 import { Starfield } from '../layout/Starfield'
 
 interface StreakConstellationProps {
+  streakDays?: number
+  activeDays?: boolean[]
+  /** @deprecated use streakDays + activeDays */
   lit?: number
+  /** @deprecated use activeDays */
   total?: number
 }
 
 const DAY_LABELS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'] as const
 
-export function StreakConstellation({ lit = 4, total = 7 }: StreakConstellationProps) {
+export function StreakConstellation({
+  streakDays,
+  activeDays,
+  lit = 0,
+  total = 7,
+}: StreakConstellationProps) {
   const { mode, c } = useThemeStore()
+
+  const count = streakDays ?? lit
+  const days: boolean[] = activeDays ?? Array.from({ length: total }, (_, i) => i < lit)
 
   return (
     <div
@@ -57,7 +69,7 @@ export function StreakConstellation({ lit = 4, total = 7 }: StreakConstellationP
               gap: 8,
             }}
           >
-            {lit} días <Flame size={22} color={c.glow} fill={c.glow} />
+            {count} días <Flame size={22} color={c.glow} fill={c.glow} />
           </div>
         </div>
       </div>
@@ -69,8 +81,7 @@ export function StreakConstellation({ lit = 4, total = 7 }: StreakConstellationP
           justifyContent: 'space-between',
         }}
       >
-        {Array.from({ length: total }).map((_, i) => {
-          const isLit = i < lit
+        {days.map((isLit, i) => {
           return (
             <div
               key={i}

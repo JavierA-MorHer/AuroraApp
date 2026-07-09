@@ -5,10 +5,12 @@ import { Avatar, tokens } from '@/design-system'
 interface TopBarProps {
   initials: string
   name: string
+  gender: 'male' | 'female' | null
   streak: number
 }
 
-export function TopBar({ initials, name, streak }: TopBarProps) {
+export function TopBar({ initials, name, gender, streak }: TopBarProps) {
+  const greeting = gender === 'male' ? 'Bienvenido,' : gender === 'female' ? 'Bienvenida,' : 'Bienvenid@,'
   const { c } = useThemeStore()
 
   return (
@@ -47,7 +49,7 @@ export function TopBar({ initials, name, streak }: TopBarProps) {
                 lineHeight: 1,
               }}
             >
-              Bienvenida,
+              {greeting}
             </p>
             <p
               style={{

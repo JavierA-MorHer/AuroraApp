@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -20,6 +20,11 @@ export function useLogin() {
     resolver: zodResolver(schema),
     defaultValues: { email: '', password: '' },
   })
+
+  useEffect(() => {
+    const subscription = form.watch(() => setServerError(null))
+    return () => subscription.unsubscribe()
+  }, [form.watch])
 
   async function handleSubmit(data: LoginCredentials) {
     setIsLoading(true)
