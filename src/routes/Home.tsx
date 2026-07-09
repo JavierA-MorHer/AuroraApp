@@ -1,7 +1,7 @@
-import { ArrowRight, BookOpen } from 'lucide-react'
+import { ArrowRight, BookOpen, CheckCircle, Sparkles } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useThemeStore } from '@/stores/useThemeStore'
 import {
-  Page,
   Container,
   Card,
   Stack,
@@ -11,18 +11,36 @@ import {
   WordCard,
   tokens,
 } from '@/design-system'
-import { TopBar } from '@/features/navigation/components/TopBar'
-import { BottomNav } from '@/features/navigation/components/BottomNav'
+import { useStreak } from '@/features/profile/hooks/useStreak'
+import { useLessons } from '@/features/lessons/hooks/useLessons'
+import { useWordOfDay } from '@/features/lessons/hooks/useWordOfDay'
 
 const TOP_BAR_H = 60
 const BOTTOM_NAV_H = 70
 
+function greeting(): string {
+  const h = new Date().getHours()
+  if (h >= 5 && h < 12) return '¡Buenos días!'
+  if (h >= 12 && h < 19) return '¡Buenas tardes!'
+  return '¡Buenas noches!'
+}
+
 export default function Home() {
   const { c } = useThemeStore()
+  const navigate = useNavigate()
+  const { streakDays, activeDays } = useStreak()
+  const { lessons, isLoading } = useLessons()
+  const { word: wordOfDay, isLoading: wordLoading } = useWordOfDay()
+
+  const activeLesson =
+    lessons.find((l) => l.status === 'in_progress') ??
+    lessons.find((l) => l.status === 'available') ??
+    null
+
+  const allCompleted = !isLoading && lessons.length > 0 && lessons.every((l) => l.status === 'completed')
 
   return (
-    <Page padding="0">
-      <TopBar initials="NV" name="Nayeli Valadez" streak={4} />
+    <>
 
       <Container size="sm">
         <div
@@ -48,7 +66,7 @@ export default function Home() {
                   letterSpacing: -0.5,
                 }}
               >
-                ¡Buenos días! 👋
+                {greeting()}
               </h1>
               <p
                 style={{
@@ -58,93 +76,139 @@ export default function Home() {
                   margin: 0,
                 }}
               >
-                Llevas 4 días seguidos. ¡No pares ahora!
+                {streakDays > 0
+                  ? `Llevas ${streakDays} día${streakDays === 1 ? '' : 's'} seguidos. ¡No pares ahora!`
+                  : 'Hoy es un buen día para practicar inglés.'}
               </p>
             </div>
 
             {/* Racha semanal */}
-            <StreakConstellation lit={4} total={7} />
+            <StreakConstellation streakDays={streakDays} activeDays={activeDays} />
 
             {/* Lección de hoy */}
-            <Card>
-              <Stack gap={4}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: tokens.radius.md,
-                      background: c.glowSoft,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0,
-                    }}
-                  >
-                    <BookOpen size={20} color={c.glow} />
+            {isLoading ? (
+              <Card>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: tokens.radius.md, background: c.bgSurfaceRaised, flexShrink: 0 }} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ height: 10, width: 80, background: c.bgSurfaceRaised, borderRadius: 4, marginBottom: 6 }} />
+                      <div style={{ height: 14, width: 160, background: c.bgSurfaceRaised, borderRadius: 4 }} />
+                    </div>
                   </div>
-                  <div>
-                    <p
+                  <div style={{ height: 8, background: c.bgSurfaceRaised, borderRadius: tokens.radius.full }} />
+                  <div style={{ height: 44, background: c.bgSurfaceRaised, borderRadius: tokens.radius.md }} />
+                </div>
+              </Card>
+            ) : allCompleted ? (
+              <Card>
+                <Stack gap={4}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div
                       style={{
-                        fontFamily: tokens.font.body,
-                        fontSize: 11,
-                        color: c.textFaint,
-                        margin: 0,
-                        textTransform: 'uppercase',
-                        letterSpacing: 1,
+                        width: 40, height: 40, borderRadius: tokens.radius.md,
+                        background: `${c.success}22`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                       }}
                     >
-                      Lección de hoy
-                    </p>
-                    <p
+                      <CheckCircle size={20} color={c.success} />
+                    </div>
+                    <div>
+                      <p style={{ fontFamily: tokens.font.body, fontSize: 11, color: c.textFaint, margin: 0, textTransform: 'uppercase', letterSpacing: 1 }}>
+                        Nivel completado
+                      </p>
+                      <p style={{ fontFamily: tokens.font.display, fontSize: 16, fontWeight: 600, color: c.text, margin: 0 }}>
+                        ¡Has terminado todas las lecciones!
+                      </p>
+                    </div>
+                  </div>
+                  <div style={{ display: 'grid' }}>
+                    <Button variant="secondary" icon={Sparkles} onClick={() => navigate('/lessons')}>
+                      Ver lecciones
+                    </Button>
+                  </div>
+                </Stack>
+              </Card>
+            ) : activeLesson ? (
+              <Card>
+                <Stack gap={4}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div
                       style={{
-                        fontFamily: tokens.font.display,
-                        fontSize: 16,
-                        fontWeight: 600,
-                        color: c.text,
-                        margin: 0,
+                        width: 40, height: 40, borderRadius: tokens.radius.md,
+                        background: c.glowSoft,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                       }}
                     >
-                      Verbos en pasado
-                    </p>
+                      <BookOpen size={20} color={c.glow} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontFamily: tokens.font.body, fontSize: 11, color: c.textFaint, margin: 0, textTransform: 'uppercase', letterSpacing: 1 }}>
+                        {activeLesson.status === 'in_progress' ? 'Continuar lección' : 'Siguiente lección'}
+                      </p>
+                      <p
+                        style={{
+                          fontFamily: tokens.font.display, fontSize: 16, fontWeight: 600, color: c.text, margin: 0,
+                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {activeLesson.title}
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                <ProgressBar value={3} max={5} label="Ejercicios completados" />
+                  <ProgressBar
+                    value={activeLesson.completedCount}
+                    max={activeLesson.exerciseCount}
+                    label={`${activeLesson.completedCount} / ${activeLesson.exerciseCount} ejercicios`}
+                  />
 
-                <div style={{ display: 'grid' }}>
-                  <Button variant="primary" icon={ArrowRight}>
-                    Continuar lección
-                  </Button>
-                </div>
-              </Stack>
-            </Card>
+                  <div style={{ display: 'grid' }}>
+                    <Button variant="primary" icon={ArrowRight} onClick={() => navigate(`/lesson/${activeLesson.id}`)}>
+                      {activeLesson.status === 'in_progress' ? 'Continuar' : 'Empezar lección'}
+                    </Button>
+                  </div>
+                </Stack>
+              </Card>
+            ) : null}
 
             {/* Palabra del día */}
-            <div>
-              <p
-                style={{
-                  fontFamily: tokens.font.body,
-                  fontSize: 11,
-                  color: c.textFaint,
-                  margin: '0 0 10px',
-                  textTransform: 'uppercase',
-                  letterSpacing: 1,
-                }}
-              >
-                Palabra del día
-              </p>
-              <WordCard
-                word="resilient"
-                translation="resiliente"
-                example="She remained resilient through every challenge."
-              />
-            </div>
+            {!wordLoading && (
+              <div>
+                <p
+                  style={{
+                    fontFamily: tokens.font.body,
+                    fontSize: 11,
+                    color: c.textFaint,
+                    margin: '0 0 10px',
+                    textTransform: 'uppercase',
+                    letterSpacing: 1,
+                  }}
+                >
+                  Palabra del día
+                </p>
+                {wordOfDay ? (
+                  <WordCard
+                    word={wordOfDay.word}
+                    translation={wordOfDay.translation}
+                    example={wordOfDay.example}
+                    exampleEs={wordOfDay.exampleEs}
+                    partOfSpeech={wordOfDay.partOfSpeech}
+                    phonetic={wordOfDay.phonetic}
+                  />
+                ) : (
+                  <WordCard
+                    word="resilient"
+                    translation="resiliente"
+                    example="She remained resilient through every challenge."
+                  />
+                )}
+              </div>
+            )}
           </Stack>
         </div>
       </Container>
 
-      <BottomNav />
-    </Page>
+    </>
   )
 }

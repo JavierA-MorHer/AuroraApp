@@ -8,9 +8,11 @@ import Home from '@/routes/Home'
 import Lessons from '@/routes/Lessons'
 import Rewards from '@/routes/Rewards'
 import Profile from '@/routes/Profile'
+import LessonPlayer from '@/routes/LessonPlayer'
 import App from './App'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { ProtectedRoute, GuestRoute } from '@/features/auth/components/AuthGuard'
+import { AppLayout } from '@/features/navigation/components/AppLayout'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,20 +29,17 @@ const router = createBrowserRouter([
     element: <GuestRoute><Login /></GuestRoute>,
   },
   {
-    path: '/home',
-    element: <ProtectedRoute><Home /></ProtectedRoute>,
+    element: <ProtectedRoute><AppLayout /></ProtectedRoute>,
+    children: [
+      { path: '/home', element: <Home /> },
+      { path: '/lessons', element: <Lessons /> },
+      { path: '/rewards', element: <Rewards /> },
+      { path: '/profile', element: <Profile /> },
+    ],
   },
   {
-    path: '/lessons',
-    element: <ProtectedRoute><Lessons /></ProtectedRoute>,
-  },
-  {
-    path: '/rewards',
-    element: <ProtectedRoute><Rewards /></ProtectedRoute>,
-  },
-  {
-    path: '/profile',
-    element: <ProtectedRoute><Profile /></ProtectedRoute>,
+    path: '/lesson/:lessonId',
+    element: <ProtectedRoute><LessonPlayer /></ProtectedRoute>,
   },
   {
     path: '/showcase',

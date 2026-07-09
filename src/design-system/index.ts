@@ -24,6 +24,7 @@ export { Tooltip } from './components/primitives/Tooltip'
 // Forms
 export { Input } from './components/forms/Input'
 export { RadioGroup } from './components/forms/RadioGroup'
+export { SegmentedControl } from './components/forms/SegmentedControl'
 export { Checkbox } from './components/forms/Checkbox'
 export { Slider } from './components/forms/Slider'
 export { Select } from './components/forms/Select'
