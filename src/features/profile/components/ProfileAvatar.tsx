@@ -24,6 +24,16 @@ export function ProfileAvatar({
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+
+    const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/jpg']
+    const fileExt = file.name.split('.').pop()?.toLowerCase()
+    const allowedExtensions = ['png', 'jpg', 'jpeg']
+
+    if (!allowedMimeTypes.includes(file.type) && !allowedExtensions.includes(fileExt || '')) {
+      alert('Solo se permiten imágenes en formato PNG o JPG.')
+      return
+    }
+
     if (onUpload) {
       await onUpload(file)
     }
@@ -159,7 +169,7 @@ export function ProfileAvatar({
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept=".png,.jpg,.jpeg"
         onChange={handleFileChange}
         style={{ display: 'none' }}
         aria-hidden="true"
