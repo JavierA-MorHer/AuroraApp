@@ -113,3 +113,11 @@ a.aurora-focusable:focus-visible {
     left: calc(100% - 24px);
   }
 }
+
+/* Stats grid optimization for smaller viewport responsive wrappers */
+@media (max-width: 480px) {
+  .aurora-home-stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+}

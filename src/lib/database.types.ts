@@ -33,6 +33,7 @@ export interface Database {
           longest_streak: number
           last_streak_date: string | null
           total_xp: number
+          level: number
           created_at: string
           updated_at: string
         }

@@ -7,7 +7,7 @@ import { BottomNav } from './BottomNav'
 
 export function AppLayout() {
   const { user } = useAuthStore()
-  const { streakDays } = useStreak()
+  const { streakDays, totalXp, level } = useStreak()
 
   const firstName: string = user?.user_metadata?.first_name ?? ''
   const lastName: string = user?.user_metadata?.last_name ?? ''
@@ -18,7 +18,15 @@ export function AppLayout() {
 
   return (
     <Page padding="0">
-      <TopBar initials={initials} avatarUrl={avatarUrl} name={displayName} gender={gender} streak={streakDays} />
+      <TopBar
+        initials={initials}
+        avatarUrl={avatarUrl}
+        name={displayName}
+        gender={gender}
+        streak={streakDays}
+        level={level}
+        totalXp={totalXp}
+      />
       <Outlet />
       <BottomNav />
     </Page>

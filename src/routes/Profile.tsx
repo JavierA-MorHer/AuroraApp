@@ -1,6 +1,7 @@
 import { Controller } from 'react-hook-form'
-import { Save, LogOut, Eye, EyeOff } from 'lucide-react'
-import { useState } from 'react'
+import { Save, LogOut, Eye, EyeOff, Flame, Sparkles, Zap } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useThemeStore } from '@/stores/useThemeStore'
 import {
   Container,
@@ -16,6 +17,7 @@ import { ProfileAvatar } from '@/features/profile/components/ProfileAvatar'
 import { useProfile } from '@/features/profile/hooks/useProfile'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { soundEffects } from '@/lib/soundEffects'
+import { useStreak } from '@/features/profile/hooks/useStreak'
 
 const TOP_BAR_H = 60
 const BOTTOM_NAV_H = 70
@@ -41,9 +43,17 @@ function SectionLabel({ children }: { children: string }) {
 export default function Profile() {
   const { c } = useThemeStore()
   const { user } = useAuthStore()
+  const queryClient = useQueryClient()
   const [showCurrent, setShowCurrent] = useState(false)
   const [showNew, setShowNew] = useState(false)
   const [soundsEnabled, setSoundsEnabled] = useState(soundEffects.isSoundEnabled())
+
+  const { totalXp, dailyGoal: currentGoal, streakDays, level } = useStreak()
+  const [dailyGoal, setDailyGoal] = useState(currentGoal)
+
+  useEffect(() => {
+    setDailyGoal(currentGoal)
+  }, [currentGoal])
 
   const firstName: string = user?.user_metadata?.first_name ?? ''
   const lastName: string = user?.user_metadata?.last_name ?? ''
@@ -111,6 +121,77 @@ export default function Profile() {
                 </p>
               )}
             </div>
+
+            {/* Resumen de Estadísticas */}
+            <Card style={{ overflow: 'hidden', padding: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', textAlign: 'center', padding: '16px 0 14px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <p style={{ fontFamily: tokens.font.mono, fontSize: 11, color: c.textFaint, textTransform: 'uppercase', margin: '0 0 4px', letterSpacing: 1 }}>
+                    Nivel
+                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, height: 28 }}>
+                    <Sparkles size={16} color={c.glow} style={{ minWidth: 16 }} />
+                    <span style={{ fontFamily: tokens.font.display, fontSize: 20, fontWeight: 700, color: c.text }}>
+                      {level}
+                    </span>
+                  </div>
+                </div>
+
+                <div style={{ width: 1, height: 32, background: c.border }} />
+
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <p style={{ fontFamily: tokens.font.mono, fontSize: 11, color: c.textFaint, textTransform: 'uppercase', margin: '0 0 4px', letterSpacing: 1 }}>
+                    XP Totales
+                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, height: 28 }}>
+                    <Zap size={16} color={c.secondary} fill={c.secondary} style={{ minWidth: 16 }} />
+                    <span style={{ fontFamily: tokens.font.display, fontSize: 20, fontWeight: 700, color: c.text }}>
+                      {totalXp}
+                    </span>
+                  </div>
+                </div>
+
+                <div style={{ width: 1, height: 32, background: c.border }} />
+
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <p style={{ fontFamily: tokens.font.mono, fontSize: 11, color: c.textFaint, textTransform: 'uppercase', margin: '0 0 4px', letterSpacing: 1 }}>
+                    Racha
+                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, height: 28 }}>
+                    <Flame size={16} color={c.glow} fill={c.glow} style={{ minWidth: 16 }} />
+                    <span style={{ fontFamily: tokens.font.display, fontSize: 20, fontWeight: 700, color: c.text }}>
+                      {streakDays} {streakDays === 1 ? 'día' : 'días'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div
+                style={{
+                  background: c.bgSurfaceRaised,
+                  padding: '10px 16px',
+                  borderTop: `1px solid ${c.border}`,
+                  textAlign: 'center',
+                }}
+              >
+                <p
+                  style={{
+                    fontFamily: tokens.font.body,
+                    fontSize: 12,
+                    color: c.textMuted,
+                    margin: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                  }}
+                >
+                  <Sparkles size={13} color={c.glow} style={{ minWidth: 13 }} />
+                  <span>
+                    El Nivel {level + 1} se alcanza a los <strong>{level * 1000} XP</strong> totales (faltan {level * 1000 - totalXp} XP)
+                  </span>
+                </p>
+              </div>
+            </Card>
 
             {/* Información personal */}
             <Stack gap={3}>
@@ -187,24 +268,42 @@ export default function Profile() {
             <Stack gap={3}>
               <SectionLabel>Preferencias</SectionLabel>
               <Card>
-                <SegmentedControl
-                  label="Efectos de sonido"
-                  options={[
-                    { label: 'Activados', value: 'on' },
-                    { label: 'Silenciados', value: 'off' },
-                  ]}
-                  value={soundsEnabled ? 'on' : 'off'}
-                  onChange={(val) => {
-                    const isNowOn = val === 'on'
-                    if (isNowOn !== soundEffects.isSoundEnabled()) {
-                      soundEffects.toggleSound()
-                      setSoundsEnabled(isNowOn)
-                      if (isNowOn) {
-                        soundEffects.playSuccess()
+                <Stack gap={4}>
+                  <SegmentedControl
+                    label="Efectos de sonido"
+                    options={[
+                      { label: 'Activados', value: 'on' },
+                      { label: 'Silenciados', value: 'off' },
+                    ]}
+                    value={soundsEnabled ? 'on' : 'off'}
+                    onChange={(val) => {
+                      const isNowOn = val === 'on'
+                      if (isNowOn !== soundEffects.isSoundEnabled()) {
+                        soundEffects.toggleSound()
+                        setSoundsEnabled(isNowOn)
+                        if (isNowOn) {
+                          soundEffects.playSuccess()
+                        }
                       }
-                    }
-                  }}
-                />
+                    }}
+                  />
+
+                  <SegmentedControl
+                    label="Meta diaria de estudio"
+                    options={[
+                      { label: 'Casual (20 XP)', value: '20' },
+                      { label: 'Normal (50 XP)', value: '50' },
+                      { label: 'Intenso (100 XP)', value: '100' },
+                    ]}
+                    value={String(dailyGoal)}
+                    onChange={async (val) => {
+                      const newGoal = parseInt(val, 10)
+                      setDailyGoal(newGoal)
+                      localStorage.setItem('aurora-daily-xp-goal', String(newGoal))
+                      await queryClient.invalidateQueries({ queryKey: ['streak', user?.id] })
+                    }}
+                  />
+                </Stack>
               </Card>
             </Stack>
 

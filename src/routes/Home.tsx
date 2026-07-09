@@ -28,7 +28,7 @@ function greeting(): string {
 export default function Home() {
   const { c } = useThemeStore()
   const navigate = useNavigate()
-  const { streakDays, activeDays } = useStreak()
+  const { streakDays, activeDays, totalXp, todayXp, dailyGoal, level } = useStreak()
   const { lessons, isLoading } = useLessons()
   const { word: wordOfDay, isLoading: wordLoading } = useWordOfDay()
 
@@ -84,6 +84,67 @@ export default function Home() {
 
             {/* Racha semanal */}
             <StreakConstellation streakDays={streakDays} activeDays={activeDays} />
+
+            {/* Progreso del Estudiante y Meta Diaria */}
+            <Card>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 20,
+                }}
+                className="aurora-home-stats-grid"
+              >
+                {/* Nivel de Experiencia */}
+                <Stack gap={2}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                    <p style={{ fontFamily: tokens.font.display, fontSize: 14, fontWeight: 600, color: c.text, margin: 0 }}>
+                      Nivel {level}
+                    </p>
+                    <span style={{ fontFamily: tokens.font.mono, fontSize: 11, color: c.textMuted }}>
+                      {totalXp % 1000}/1000 XP
+                    </span>
+                  </div>
+                  <ProgressBar value={totalXp % 1000} max={1000} />
+                  <p style={{ fontFamily: tokens.font.body, fontSize: 11, color: c.textFaint, margin: 0 }}>
+                    El Nivel {level + 1} se alcanza a los {level * 1000} XP totales (faltan {level * 1000 - totalXp} XP)
+                  </p>
+                </Stack>
+
+                {/* Meta Diaria */}
+                <Stack gap={2}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                    <p style={{ fontFamily: tokens.font.display, fontSize: 14, fontWeight: 600, color: c.text, margin: 0 }}>
+                      Meta Diaria
+                    </p>
+                    <span style={{ fontFamily: tokens.font.mono, fontSize: 11, color: todayXp >= dailyGoal ? c.success : c.textMuted, fontWeight: todayXp >= dailyGoal ? 600 : 400 }}>
+                      {todayXp}/{dailyGoal} XP
+                    </span>
+                  </div>
+                  <ProgressBar value={todayXp} max={dailyGoal} />
+                  <p
+                    style={{
+                      fontFamily: tokens.font.body,
+                      fontSize: 11,
+                      color: todayXp >= dailyGoal ? c.success : c.textFaint,
+                      margin: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 4,
+                    }}
+                  >
+                    {todayXp >= dailyGoal ? (
+                      <>
+                        <Sparkles size={11} color={c.success} style={{ minWidth: 11 }} />
+                        <span>¡Meta diaria completada!</span>
+                      </>
+                    ) : (
+                      `${Math.max(dailyGoal - todayXp, 0)} XP para cumplir tu meta`
+                    )}
+                  </p>
+                </Stack>
+              </div>
+            </Card>
 
             {/* Lección de hoy */}
             {isLoading ? (

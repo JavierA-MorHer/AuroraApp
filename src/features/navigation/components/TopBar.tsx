@@ -1,4 +1,4 @@
-import { Flame } from 'lucide-react'
+import { Flame, Sparkles } from 'lucide-react'
 import { useThemeStore } from '@/stores/useThemeStore'
 import { Avatar, tokens } from '@/design-system'
 
@@ -8,9 +8,11 @@ interface TopBarProps {
   name: string
   gender: 'male' | 'female' | null
   streak: number
+  level?: number
+  totalXp?: number
 }
 
-export function TopBar({ initials, avatarUrl, name, gender, streak }: TopBarProps) {
+export function TopBar({ initials, avatarUrl, name, gender, streak, level = 1, totalXp }: TopBarProps) {
   const greeting = gender === 'male' ? 'Bienvenido,' : gender === 'female' ? 'Bienvenida,' : 'Bienvenid@,'
   const { c } = useThemeStore()
 
@@ -66,29 +68,58 @@ export function TopBar({ initials, avatarUrl, name, gender, streak }: TopBarProp
           </div>
         </div>
 
-        {/* Racha */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 5,
-            background: c.bgSurfaceRaised,
-            border: `1px solid ${c.border}`,
-            borderRadius: tokens.radius.full,
-            padding: '6px 12px',
-          }}
-        >
-          <Flame size={15} color={c.glow} fill={c.glow} />
-          <span
+        {/* Indicadores: Nivel y Racha */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* Nivel */}
+          <div
             style={{
-              fontFamily: tokens.font.mono,
-              fontSize: 13,
-              fontWeight: 600,
-              color: c.text,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              background: `${c.glow}11`,
+              border: `1px solid ${c.glow}33`,
+              borderRadius: tokens.radius.full,
+              padding: '6px 12px',
+            }}
+            title={`Nivel ${level} (${totalXp || 0} XP totales)`}
+          >
+            <Sparkles size={13} color={c.glow} />
+            <span
+              style={{
+                fontFamily: tokens.font.display,
+                fontSize: 13,
+                fontWeight: 600,
+                color: c.glow,
+              }}
+            >
+              Lvl {level}
+            </span>
+          </div>
+
+          {/* Racha */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
+              background: c.bgSurfaceRaised,
+              border: `1px solid ${c.border}`,
+              borderRadius: tokens.radius.full,
+              padding: '6px 12px',
             }}
           >
-            {streak} días
-          </span>
+            <Flame size={15} color={c.glow} fill={c.glow} />
+            <span
+              style={{
+                fontFamily: tokens.font.mono,
+                fontSize: 13,
+                fontWeight: 600,
+                color: c.text,
+              }}
+            >
+              {streak} {streak === 1 ? 'día' : 'días'}
+            </span>
+          </div>
         </div>
       </div>
     </header>
